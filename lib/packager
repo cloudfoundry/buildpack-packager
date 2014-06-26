@@ -56,7 +56,7 @@ function __build_zip_exclusion_string {
 }
 
 function __generate_filename {
-    source ${BASE_PATH}/version
+    version=$(cat ${BASE_PATH}/VERSION)
 
     filename=${language}'_buildpack'
 
@@ -64,7 +64,7 @@ function __generate_filename {
         filename=${filename}'-offline'
     fi
 
-    filename=${filename}'-v'${VERSION}
+    filename=${filename}'-v'${version}
     filename=${filename}'.zip'
 
     echo ${filename}
