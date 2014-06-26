@@ -1,0 +1,88 @@
+#!/bin/bash
+
+# To run
+#
+#   test/test_packager
+
+# ==================================== Mocks ====================================
+# The mocks are not subshell safe.  They work by defining a global bash function that takes precedence over the UNIX
+# tools like curl and zip
+function curl() {
+    args="$@";
+    ARGUMENTS_CALLED_WITH_FOR_CURL=("${ARGUMENTS_CALLED_WITH_FOR_CURL[@]}" "$args");
+    return 0;
+}
+
+function zip() {
+    args="$@";
+    ARGUMENTS_CALLED_WITH_FOR_ZIP=("${ARGUMENTS_CALLED_WITH_FOR_ZIP[@]}" "$args");
+    return 0;
+}
+
+# Reset mocks
+setUp() {
+    ARGUMENTS_CALLED_WITH_FOR_CURL=()
+    ARGUMENTS_CALLED_WITH_FOR_ZIP=()
+}
+
+# ==================================== Tests ====================================
+testDependenciesAreDownloadedInOfflineMode() {
+    source $BIN/package offline
+
+    assertEquals 'curl should download files with the url in the saved filename' \
+                   'http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o ./dependencies/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L' \
+                   "${ARGUMENTS_CALLED_WITH_FOR_CURL[0]}"
+
+    assertEquals 'curl downloads 1 dependency' "1" "${#ARGUMENTS_CALLED_WITH_FOR_CURL[@]}"
+}
+
+testDependenciesAreNotDownloadedInOnlineMode() {
+    source $BIN/package online
+
+    assertEquals 'curl downloads 0 dependencies' "0" "${#ARGUMENTS_CALLED_WITH_FOR_CURL[@]}"
+}
+
+testZipForBuildpackIsCreated() {
+    source $BIN/package online
+
+    assertEquals 'Buildpack is zipped' "1" "${#ARGUMENTS_CALLED_WITH_FOR_ZIP[@]}"
+}
+
+testOnlineZipIsCreatedWithCorrectName() {
+    source $BIN/package online
+    first_call=${ARGUMENTS_CALLED_WITH_FOR_ZIP[0]}
+    assertTrue "online zip has version number and no mode" $(contains "$first_call" "squeak_buildpack-v1.0.1.zip")
+}
+
+testOfflineZipIsCreatedWithCorrectName() {
+    source $BIN/package offline
+    first_call=${ARGUMENTS_CALLED_WITH_FOR_ZIP[0]}
+    assertTrue "offline zip has version number and mode" $(contains "$first_call" "squeak_buildpack-offline-v1.0.1.zip")
+}
+
+testExcludeFilesFromTheBuildpack() {
+    source $BIN/package online
+
+    arguments=$ARGUMENTS_CALLED_WITH_FOR_ZIP[@]
+
+    assertTrue "zip excludes .git"       $(contains "$arguments" " --exclude=*.git/*")
+    assertTrue "zip excludes .gitignore" $(contains "$arguments" " --exclude=*.gitignore*")
+    assertTrue "zip excludes test"       $(contains "$arguments" " --exclude=*test/*")
+}
+
+# ==================================== Utilities ====================================
+function contains() {
+    string=$1
+    substring=$2
+
+    if [[ $string == *"${substring}"* ]]
+    then
+        echo '0'
+    else
+        echo '1'
+    fi
+}
+
+TEST_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BIN=$TEST_DIR/fixtures/squeak_buildpack/bin
+source $TEST_DIR/../vendor/shunit2
