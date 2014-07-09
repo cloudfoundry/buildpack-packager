@@ -17,6 +17,7 @@ function __parse_arguments {
 
 function __create_work_directory {
     old_dir=$(pwd)
+    rm -rf ${WORK_DIRECTORY}
     mkdir ${WORK_DIRECTORY}
 }
 
