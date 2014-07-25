@@ -4,12 +4,16 @@
 #
 #   test/test_packager
 
+CACHE_DIRECTORY="$(getconf DARWIN_USER_CACHE_DIR)/test-cache"
+WORK_DIRECTORY="$(getconf DARWIN_USER_TEMP_DIR)/test-temp"
+
 # ==================================== Mocks ====================================
 # The mocks are not subshell safe.  They work by defining a global bash function that takes precedence over the UNIX
 # tools like curl and zip
 function curl() {
     args="$@";
     ARGUMENTS_CALLED_WITH_FOR_CURL=("${ARGUMENTS_CALLED_WITH_FOR_CURL[@]}" "$args");
+    touch $3
     return 0;
 }
 
@@ -20,7 +24,13 @@ function zip() {
 }
 
 # Reset mocks
+
+clearCache() {
+    rm -rf ${CACHE_DIRECTORY}
+}
+
 setUp() {
+    clearCache
     ARGUMENTS_CALLED_WITH_FOR_CURL=()
     ARGUMENTS_CALLED_WITH_FOR_ZIP=()
 }
@@ -30,10 +40,11 @@ testDependenciesAreDownloadedInOfflineMode() {
     source $BIN/package offline
 
     assertEquals 'curl should download files with the url in the saved filename' \
-                   'http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o ./dependencies/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L' \
+                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o ${CACHE_DIRECTORY}/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
                    "${ARGUMENTS_CALLED_WITH_FOR_CURL[0]}"
 
     assertEquals 'curl downloads 1 dependency' "1" "${#ARGUMENTS_CALLED_WITH_FOR_CURL[@]}"
+
 }
 
 testDependenciesAreNotDownloadedInOnlineMode() {
@@ -70,6 +81,41 @@ testExcludeFilesFromTheBuildpack() {
     assertTrue "zip excludes test"       $(contains "$arguments" " --exclude=*test/*")
 }
 
+testCachesDependenciesInOfflineMode() {
+    source $BIN/package offline
+
+    assertEquals 'curl should download files with the url in the saved filename' \
+                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $CACHE_DIRECTORY/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
+                   "${ARGUMENTS_CALLED_WITH_FOR_CURL[0]}"
+
+    assertEquals 'curl downloads 1 dependency' "1" "${#ARGUMENTS_CALLED_WITH_FOR_CURL[@]}"
+
+    source $BIN/package offline --use-cache
+
+    assertEquals 'curl downloads 1 dependencies' "1" "${#ARGUMENTS_CALLED_WITH_FOR_CURL[@]}"
+}
+
+testDoesNotUseCacheWithNoCacheFlag() {
+    source $BIN/package offline
+
+    assertEquals 'curl should download files with the url in the saved filename' \
+                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $CACHE_DIRECTORY/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
+                   "${ARGUMENTS_CALLED_WITH_FOR_CURL[0]}"
+
+    source $BIN/package offline
+
+    assertEquals 'curl should download files with the url in the saved filename' \
+                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $CACHE_DIRECTORY/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
+                   "${ARGUMENTS_CALLED_WITH_FOR_CURL[1]}"
+
+    assertEquals 'curl downloads 2 dependency' "2" "${#ARGUMENTS_CALLED_WITH_FOR_CURL[@]}"
+}
+
+testDoesNotSupportCacheFlagInOnlineMode() {
+    result=$(source $BIN/package online --use-cache)
+
+    assertTrue 'Usage message should appear' $(contains "$result" "Usage:")
+}
 # ==================================== Utilities ====================================
 function contains() {
     string=$1

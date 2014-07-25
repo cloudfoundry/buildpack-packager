@@ -1,17 +1,37 @@
 PACKAGER_LIB="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 : ${BASE_PATH:=${PACKAGER_LIB}/../..}
 : ${WORK_DIRECTORY:=/tmp/_make_buildpack}
+: ${CACHE_DIRECTORY:="$(getconf DARWIN_USER_CACHE_DIR)/buildpack-packager"}
+
+function __print_usage {
+    echo "Usage:"
+    echo "  $0 [online|offline]"
+    echo -e "\n\n  'offline' supports these options:"
+    echo -e "\n    --cache\tcache or use cached downloads. This speeds up subsequent packaging significantly."
+    exit 1
+}
 
 function __check_usage {
-    if [ ${number_of_arguments} -ne 1 ] || ([ ${mode} != "online" ] && [ ${mode} != "offline" ]); then
-      echo "Usage:"
-      echo "  ./package [online|offline]"
-      exit 1
+    if [ ${mode} == "online" ] && [ "${cache}" == false ]; then
+      return
     fi
+
+    if [ ${mode} == "offline" ]; then
+        return
+    fi
+
+    __print_usage
 }
 
 function __parse_arguments {
     number_of_arguments=$#
+
+    if [ "$2" == "--use-cache" ]; then
+      cache=true
+    else
+      cache=false
+    fi
+
     mode=$1
 }
 
@@ -19,6 +39,7 @@ function __create_work_directory {
     old_dir=$(pwd)
     rm -rf ${WORK_DIRECTORY}
     mkdir ${WORK_DIRECTORY}
+    mkdir -p ${CACHE_DIRECTORY}
 }
 
 function __setup {
@@ -36,13 +57,22 @@ function __translate_url_to_filename {
     sed 's/[:\/]/_/g' <<< ${dependency_url}
 }
 
+
+function __download_dependency {
+    filename=$(__translate_url_to_filename $1)
+
+    if [ "$cache" == false ] || [ ! -f ${CACHE_DIRECTORY}/${filename} ]; then
+        curl $1 -o ${CACHE_DIRECTORY}/${filename} -L
+    fi
+
+    cp ${CACHE_DIRECTORY}/${filename} ./dependencies
+}
+
 function __package_dependencies {
     mkdir dependencies
 
-    for dependency in ${dependencies[@]}
-    do
-       filename=$(__translate_url_to_filename ${dependency})
-       curl ${dependency} -o ./dependencies/${filename} -L
+    for dependency in ${dependencies[@]}; do
+       __download_dependency ${dependency}
     done
 }
 
@@ -74,7 +104,6 @@ function __generate_filename {
 function __zip_buildpack {
     zip -r ${BASE_PATH}/$(__generate_filename) ./ $(__build_zip_exclusion_string)
 }
-
 
 function __cleanup {
     cd ${old_dir}
