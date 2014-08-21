@@ -49,9 +49,20 @@ function __create_work_directory {
     mkdir -p ${cache_directory}
 }
 
+function __check_for_zip {
+    which zip
+    if [ "$?" -ne "0" ]; then
+        echo "Zip not installed"
+        echo "Try: apt-get install zip"
+        echo "And then rerun: $@"
+        exit 1
+    fi
+}
+
 function __setup {
     __parse_arguments $@
     __check_usage
+    __check_for_zip
     __create_work_directory
 }
 

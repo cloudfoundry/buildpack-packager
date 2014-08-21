@@ -22,6 +22,20 @@ getconf() {
     fi
 }
 
+which() {
+    args="$@"
+    if [ "$1" == "zip" ]; then
+        if [ "$zip_installed" == "y" ]; then
+            return 0
+        else
+            return 1
+        fi
+    else
+        echo "which not stubbed for: ${args}"
+        exit 1
+    fi
+}
+
 # ==================================== Mocks ====================================
 # The mocks are not subshell safe.  They work by defining a global bash function that takes precedence over the UNIX
 # tools like curl and zip
@@ -51,6 +65,7 @@ setUp() {
     ARGUMENTS_CALLED_WITH_FOR_CURL=()
     ARGUMENTS_CALLED_WITH_FOR_ZIP=()
     uname="Darwin"
+    zip_installed="y"
 }
 
 # ==================================== Tests ====================================
@@ -87,6 +102,15 @@ testDependenciesAreNotDownloadedInOnlineMode() {
     source $BIN/package online
 
     assertEquals 'curl downloads 0 dependencies' "0" "${#ARGUMENTS_CALLED_WITH_FOR_CURL[@]}"
+}
+
+testGuidesUserToInstallZipWhenNotInstalled() {
+    zip_installed="n"
+    result=$(source $BIN/package online)
+
+    assertFalse 'Exits with error when it fails' "$?"
+    assertTrue 'Zip not installed error should appear' $(contains "$result" "Zip not installed")
+    assertTrue 'Zip install instructions should appear' $(contains "$result" "apt-get install zip")
 }
 
 testZipForBuildpackIsCreated() {
