@@ -2,7 +2,12 @@ PACKAGER_LIB="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 : ${BASE_PATH:=${PACKAGER_LIB}/../..}
 
 temp_directory=/tmp/_make_buildpack
-cache_directory="$(getconf DARWIN_USER_CACHE_DIR)/buildpack-packager"
+
+if [ "$(uname)" == "Darwin" ]; then
+    cache_directory="$(getconf DARWIN_USER_CACHE_DIR)/buildpack-packager"
+elif [ "$(uname)" == "Linux" ]; then
+    cache_directory="/var/cache/buildpack-packager"
+fi
 
 function __print_usage {
     echo "Usage:"
