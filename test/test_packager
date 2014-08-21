@@ -4,8 +4,19 @@
 #
 #   test/test_packager
 
-CACHE_DIRECTORY="$(getconf DARWIN_USER_CACHE_DIR)/test-cache"
-WORK_DIRECTORY="$(getconf DARWIN_USER_TEMP_DIR)/test-temp"
+test_cache_directory="$(getconf DARWIN_USER_CACHE_DIR)test-cache"
+
+# ==================================== Stubs ====================================
+
+getconf() {
+    args="$@"
+    if [ "$1" == "DARWIN_USER_CACHE_DIR" ]; then
+        echo "$test_cache_directory"
+    else
+        echo "getconf not stubbed for: ${args}"
+        exit 1
+    fi
+}
 
 # ==================================== Mocks ====================================
 # The mocks are not subshell safe.  They work by defining a global bash function that takes precedence over the UNIX
@@ -23,10 +34,11 @@ function zip() {
     return 0;
 }
 
+
 # Reset mocks
 
 clearCache() {
-    rm -rf ${CACHE_DIRECTORY}
+    rm -rf ${test_cache_directory}
 }
 
 setUp() {
@@ -40,7 +52,7 @@ testDependenciesAreDownloadedInOfflineMode() {
     source $BIN/package offline
 
     assertEquals 'curl should download files with the url in the saved filename' \
-                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o ${CACHE_DIRECTORY}/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
+                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o ${test_cache_directory}/buildpack-packager/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
                    "${ARGUMENTS_CALLED_WITH_FOR_CURL[0]}"
 
     assertEquals 'curl downloads 1 dependency' "1" "${#ARGUMENTS_CALLED_WITH_FOR_CURL[@]}"
@@ -85,7 +97,7 @@ testCachesDependenciesInOfflineMode() {
     source $BIN/package offline
 
     assertEquals 'curl should download files with the url in the saved filename' \
-                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $CACHE_DIRECTORY/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
+                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $test_cache_directory/buildpack-packager/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
                    "${ARGUMENTS_CALLED_WITH_FOR_CURL[0]}"
 
     assertEquals 'curl downloads 1 dependency' "1" "${#ARGUMENTS_CALLED_WITH_FOR_CURL[@]}"
@@ -99,13 +111,13 @@ testDoesNotUseCacheWithNoCacheFlag() {
     source $BIN/package offline
 
     assertEquals 'curl should download files with the url in the saved filename' \
-                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $CACHE_DIRECTORY/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
+                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $test_cache_directory/buildpack-packager/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
                    "${ARGUMENTS_CALLED_WITH_FOR_CURL[0]}"
 
     source $BIN/package offline
 
     assertEquals 'curl should download files with the url in the saved filename' \
-                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $CACHE_DIRECTORY/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
+                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $test_cache_directory/buildpack-packager/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
                    "${ARGUMENTS_CALLED_WITH_FOR_CURL[1]}"
 
     assertEquals 'curl downloads 2 dependency' "2" "${#ARGUMENTS_CALLED_WITH_FOR_CURL[@]}"

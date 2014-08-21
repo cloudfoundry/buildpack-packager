@@ -1,7 +1,8 @@
 PACKAGER_LIB="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 : ${BASE_PATH:=${PACKAGER_LIB}/../..}
-: ${WORK_DIRECTORY:=/tmp/_make_buildpack}
-: ${CACHE_DIRECTORY:="$(getconf DARWIN_USER_CACHE_DIR)/buildpack-packager"}
+
+temp_directory=/tmp/_make_buildpack
+cache_directory="$(getconf DARWIN_USER_CACHE_DIR)/buildpack-packager"
 
 function __print_usage {
     echo "Usage:"
@@ -37,9 +38,9 @@ function __parse_arguments {
 
 function __create_work_directory {
     old_dir=$(pwd)
-    rm -rf ${WORK_DIRECTORY}
-    mkdir ${WORK_DIRECTORY}
-    mkdir -p ${CACHE_DIRECTORY}
+    rm -rf ${temp_directory}
+    mkdir ${temp_directory}
+    mkdir -p ${cache_directory}
 }
 
 function __setup {
@@ -49,7 +50,7 @@ function __setup {
 }
 
 function __copy_buildpack_to_work_directory {
-    cp -r ${BASE_PATH}/* ${WORK_DIRECTORY}
+    cp -r ${BASE_PATH}/* ${temp_directory}
 }
 
 function __translate_url_to_filename {
@@ -61,11 +62,11 @@ function __translate_url_to_filename {
 function __download_dependency {
     filename=$(__translate_url_to_filename $1)
 
-    if [ "$cache" == false ] || [ ! -f ${CACHE_DIRECTORY}/${filename} ]; then
-        curl $1 -o ${CACHE_DIRECTORY}/${filename} -L
+    if [ "$cache" == false ] || [ ! -f ${cache_directory}/${filename} ]; then
+        curl $1 -o ${cache_directory}/${filename} -L
     fi
 
-    cp ${CACHE_DIRECTORY}/${filename} ./dependencies
+    cp ${cache_directory}/${filename} ./dependencies
 }
 
 function __package_dependencies {
@@ -107,7 +108,7 @@ function __zip_buildpack {
 
 function __cleanup {
     cd ${old_dir}
-    rm -rf ${WORK_DIRECTORY}
+    rm -rf ${temp_directory}
 }
 
 function package_buildpack {
@@ -115,7 +116,7 @@ function package_buildpack {
 
     __copy_buildpack_to_work_directory
 
-    cd ${WORK_DIRECTORY}
+    cd ${temp_directory}
 
     if [[ ${mode} == 'offline' ]]; then
         __package_dependencies
