@@ -43,6 +43,7 @@ function zip() {
 
 clearCache() {
     rm -rf ${osx_user_cache_directory}
+    rm -rf ~/.buildpack-packager
 }
 
 setUp() {
@@ -67,9 +68,11 @@ testDependenciesAreDownloadedInOfflineMode() {
 testCacheDirIsLinuxCache() {
     uname="Linux"
 
-    result=$(source $BIN/package offline 2>&1)
+    source $BIN/package offline
 
-    assertTrue 'Permissions errors should occur while testing on OS X' $(contains "$result" "Permission denied")
+    assertEquals 'curl should download files with the url in the saved filename' \
+                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $HOME/.buildpack-packager/cache/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
+                   "${ARGUMENTS_CALLED_WITH_FOR_CURL[0]}"
 }
 
 testCacheDirIsOSXCache() {

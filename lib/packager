@@ -6,7 +6,8 @@ temp_directory=/tmp/_make_buildpack
 if [ "$(uname)" == "Darwin" ]; then
     cache_directory="$(getconf DARWIN_USER_CACHE_DIR)/buildpack-packager"
 elif [ "$(uname)" == "Linux" ]; then
-    cache_directory="/var/cache/buildpack-packager"
+    mkdir -p ~/.buildpack-packager/cache
+    cache_directory=~/.buildpack-packager/cache
 fi
 
 function __print_usage {
@@ -71,7 +72,7 @@ function __download_dependency {
         curl $1 -o ${cache_directory}/${filename} -L
     fi
 
-    cp ${cache_directory}/${filename} ./dependencies
+    cp "${cache_directory}/${filename}" ./dependencies
 }
 
 function __package_dependencies {
