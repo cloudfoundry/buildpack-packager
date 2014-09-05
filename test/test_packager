@@ -175,6 +175,7 @@ testDoesNotSupportCacheFlagInOnlineMode() {
     result=$(source $BIN/package online --use-cache)
 
     assertTrue 'Usage message should appear' $(contains "$result" "Usage:")
+    assertTrue 'Usage message should indicate cache can be used' $(contains "$result" "--use-cache")
 }
 # ==================================== Utilities ====================================
 function contains() {

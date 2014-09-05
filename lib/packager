@@ -14,7 +14,7 @@ function __print_usage {
     echo "Usage:"
     echo "  $0 [online|offline]"
     echo -e "\n\n  'offline' supports these options:"
-    echo -e "\n    --cache\tcache or use cached downloads. This speeds up subsequent packaging significantly."
+    echo -e "\n    --use-cache\tcache or use cached downloads. This speeds up subsequent packaging significantly."
     exit 1
 }
 
