@@ -50,7 +50,7 @@ function __create_work_directory {
 }
 
 function __check_for_zip {
-    which zip
+    which zip > /dev/null
     if [ "$?" -ne "0" ]; then
         echo "Zip not installed"
         echo "Try: apt-get install zip"
@@ -120,7 +120,9 @@ function __generate_filename {
 }
 
 function __zip_buildpack {
-    zip -r ${BASE_PATH}/$(__generate_filename) ./ $(__build_zip_exclusion_string)
+    zip_path=${BASE_PATH}/$(__generate_filename)
+    rm ${zip_path} 2>/dev/null # this is faster than updating an existing zip
+    zip -r ${zip_path} ./ $(__build_zip_exclusion_string)
 }
 
 function __cleanup {
