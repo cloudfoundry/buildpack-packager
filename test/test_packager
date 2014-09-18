@@ -41,6 +41,13 @@ which() {
 # tools like curl and zip
 function curl() {
     args="$@";
+
+    if [ $1 == "http://example.com/this/url/causes/a/404" ]; then
+        real_curl=(/usr/bin/which curl)
+        ($real_curl $args)
+        return $?;
+    fi
+    
     ARGUMENTS_CALLED_WITH_FOR_CURL=("${ARGUMENTS_CALLED_WITH_FOR_CURL[@]}" "$args");
     touch $3
     return 0;
@@ -73,7 +80,7 @@ testDependenciesAreDownloadedInOfflineMode() {
     source $BIN/package offline
 
     assertEquals 'curl should download files with the url in the saved filename' \
-                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o ${osx_user_cache_directory}/buildpack-packager/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
+                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o ${osx_user_cache_directory}/buildpack-packager/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L --fail" \
                    "${ARGUMENTS_CALLED_WITH_FOR_CURL[0]}"
 
     assertEquals 'curl downloads 1 dependency' "1" "${#ARGUMENTS_CALLED_WITH_FOR_CURL[@]}"
@@ -86,7 +93,7 @@ testCacheDirIsLinuxCache() {
     source $BIN/package offline
 
     assertEquals 'curl should download files with the url in the saved filename' \
-                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $HOME/.buildpack-packager/cache/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
+                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $HOME/.buildpack-packager/cache/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L --fail" \
                    "${ARGUMENTS_CALLED_WITH_FOR_CURL[0]}"
 }
 
@@ -94,7 +101,7 @@ testCacheDirIsOSXCache() {
     source $BIN/package offline
 
     assertEquals 'curl should download files into the OS X user cache directory' \
-               "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o ${osx_user_cache_directory}/buildpack-packager/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
+               "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o ${osx_user_cache_directory}/buildpack-packager/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L --fail" \
                "${ARGUMENTS_CALLED_WITH_FOR_CURL[0]}"
 }
 
@@ -145,7 +152,7 @@ testCachesDependenciesInOfflineMode() {
     source $BIN/package offline
 
     assertEquals 'curl should download files with the url in the saved filename' \
-                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $osx_user_cache_directory/buildpack-packager/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
+                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $osx_user_cache_directory/buildpack-packager/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L --fail" \
                    "${ARGUMENTS_CALLED_WITH_FOR_CURL[0]}"
 
     assertEquals 'curl downloads 1 dependency' "1" "${#ARGUMENTS_CALLED_WITH_FOR_CURL[@]}"
@@ -159,13 +166,13 @@ testDoesNotUseCacheWithNoCacheFlag() {
     source $BIN/package offline
 
     assertEquals 'curl should download files with the url in the saved filename' \
-                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $osx_user_cache_directory/buildpack-packager/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
+                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $osx_user_cache_directory/buildpack-packager/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L --fail" \
                    "${ARGUMENTS_CALLED_WITH_FOR_CURL[0]}"
 
     source $BIN/package offline
 
     assertEquals 'curl should download files with the url in the saved filename' \
-                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $osx_user_cache_directory/buildpack-packager/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L" \
+                   "http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip -o $osx_user_cache_directory/buildpack-packager/http___ftp.squeak.org_4.5_Squeak-4.5-All-in-One.zip -L --fail" \
                    "${ARGUMENTS_CALLED_WITH_FOR_CURL[1]}"
 
     assertEquals 'curl downloads 2 dependency' "2" "${#ARGUMENTS_CALLED_WITH_FOR_CURL[@]}"
@@ -177,6 +184,16 @@ testDoesNotSupportCacheFlagInOnlineMode() {
     assertTrue 'Usage message should appear' $(contains "$result" "Usage:")
     assertTrue 'Usage message should indicate cache can be used' $(contains "$result" "--use-cache")
 }
+
+testCurlHTTPErrorsStopPackaging() {
+    result=$(source $BIN_FAILS/package offline)
+
+    assertFalse 'Exits with error when it fails' "$?"
+    assertEquals 'Packing script should abort because of HTTP error from curl' \
+        "Cancelled packaging because of HTTP error when fetching http://example.com/this/url/causes/a/404" \
+        "$result"
+}
+
 # ==================================== Utilities ====================================
 function contains() {
     string=$1
@@ -192,4 +209,5 @@ function contains() {
 
 TEST_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BIN=$TEST_DIR/fixtures/squeak_buildpack/bin
+BIN_FAILS=$TEST_DIR/fixtures/buildpack_with_bad_dependency/bin
 source $TEST_DIR/../vendor/shunit2
