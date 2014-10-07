@@ -1,3 +1,4 @@
+# -*- sh -*-
 PACKAGER_LIB="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 : ${BASE_PATH:=${PACKAGER_LIB}/../..}
 
