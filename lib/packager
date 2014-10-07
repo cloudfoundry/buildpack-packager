@@ -128,7 +128,7 @@ function __generate_filename {
 
 function __zip_buildpack {
     zip_path=${BASE_PATH}/$(__generate_filename)
-    rm ${zip_path} 2>/dev/null # this is faster than updating an existing zip
+    rm -f ${zip_path} *buildpack*zip
     zip -r ${zip_path} ./ $(__build_zip_exclusion_string)
 }
 
