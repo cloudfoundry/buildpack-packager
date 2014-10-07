@@ -100,6 +100,27 @@ function __package_dependencies {
     done
 }
 
+function __create_symlink {
+    from=$1
+    to=$2
+
+    pushd "${temp_directory}/dependencies" > /dev/null
+    ln -v -s "${from}" "${to}"
+    popd > /dev/null
+}
+
+function __build_symlinks {
+    for symlink in ${symlinks[@]}; do
+	from=$(echo $symlink | cut -d ':' -f1)
+	to=$(echo $symlink | cut -d ':' -f2)
+	if [ -z "$from" -o -z "$to" ] ; then
+            echo "Cancelled packaging because symlinks syntax is wrong, should be /path/from:/path/to"
+            exit 1
+        fi
+        __create_symlink ${from} ${to}
+    done
+}
+
 function __build_zip_exclusion_string {
     zip_exclude_string=''
     for excluded_file in ${excluded_files[@]}
@@ -128,7 +149,7 @@ function __generate_filename {
 function __zip_buildpack {
     zip_path=${BASE_PATH}/$(__generate_filename)
     rm ${zip_path} 2>/dev/null # this is faster than updating an existing zip
-    zip -r ${zip_path} ./ $(__build_zip_exclusion_string)
+    zip --symlinks -r ${zip_path} ./ $(__build_zip_exclusion_string)
 }
 
 function __cleanup {
@@ -145,6 +166,7 @@ function package_buildpack {
 
     if [[ ${mode} == 'offline' ]]; then
         __package_dependencies
+        __build_symlinks
     fi
 
     __zip_buildpack
