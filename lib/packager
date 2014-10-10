@@ -20,11 +20,11 @@ function __print_usage {
 }
 
 function __check_usage {
-    if [ ${mode:-} == "online" ] && [ ${cache:-''} == false ]; then
+    if [ "${mode:-}" == "online" ] && [ ${cache:-''} == false ]; then
       return
     fi
 
-    if [ ${mode} == "offline" ]; then
+    if [ "${mode}" == "offline" ]; then
         return
     fi
 
@@ -34,7 +34,7 @@ function __check_usage {
 function __parse_arguments {
     number_of_arguments=$#
 
-    if [ ${2:-} == "--use-cache" ]; then
+    if [ "${2:-}" == "--use-cache" ]; then
       cache=true
     else
       cache=false
