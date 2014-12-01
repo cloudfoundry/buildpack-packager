@@ -150,27 +150,29 @@ module Buildpack
 
       context 'an offline buildpack' do
         let(:buildpack_mode) { :offline }
+        let(:cached_file) { File.join(cache_dir, "file____etc_hosts") }
 
         context 'by default' do
           specify do
-            expect(Packager).to receive(:download_file).once.and_call_original
             Packager.package(buildpack)
+            expect(File).to exist(cached_file)
           end
         end
 
         context 'with the cache option enabled' do
           context 'cached file does not exist' do
             specify do
-              expect(Packager).to receive(:download_file).once.and_call_original
               Packager.package(buildpack.merge(cache: true))
+              expect(File).to exist(cached_file)
             end
           end
 
           context 'on subsequent calls' do
             it 'uses the cached file instead of downloading it again' do
-              expect(Packager).to receive(:download_file).once.and_call_original
               Packager.package(buildpack.merge(cache: true))
+              File.write(cached_file, 'a')
               Packager.package(buildpack.merge(cache: true))
+              expect(File.read(cached_file)).to eq 'a'
             end
           end
         end
