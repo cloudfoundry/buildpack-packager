@@ -129,7 +129,7 @@ function __build_zip_exclusion_string {
 function __zip_buildpack {
 #    zip_path=${BASE_PATH}/$(__generate_filename)
 #    rm -f ${zip_path} *buildpack*zip
-    zip -r ${zip_path} ./ $(__build_zip_exclusion_string)
+#    zip -r ${zip_path} ./ $(__build_zip_exclusion_string)
 }
 
 function __cleanup {

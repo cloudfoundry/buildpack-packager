@@ -7,7 +7,7 @@ def make_fake_files(root, file_list)
   file_list.each do |file|
     full_path = File.join(root, file)
     `mkdir -p #{File.dirname(full_path)}`
-    `touch #{full_path}`
+    `echo 'a' > #{full_path}`
   end
 end
 
@@ -34,7 +34,8 @@ module Buildpack
       {
           root_dir: buildpack_dir,
           mode: buildpack_mode,
-          language: 'sample'
+          language: 'sample',
+          dependencies: ["file:///etc/hosts"]
       }
     }
     let(:files_to_include) {
@@ -49,7 +50,7 @@ module Buildpack
     before do
       make_fake_files(
           buildpack_dir,
-          files_to_include
+          files_to_include,
       )
       `echo "1.2.3" > #{File.join(buildpack_dir, 'VERSION')}`
     end
@@ -82,16 +83,32 @@ module Buildpack
       end
     end
 
-    describe do
-      let(:buildpack_mode) { :online }
+    describe 'the zip file contents' do
+      context 'an online buildpack' do
+        let(:buildpack_mode) { :online }
 
-      specify do
-        Packager.package(buildpack)
+        specify do
+          Packager.package(buildpack)
 
-        zip_file_path = File.join(buildpack_dir, 'sample_buildpack-online-v1.2.3.zip')
-        zip_contents = get_zip_contents(zip_file_path)
+          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-online-v1.2.3.zip')
+          zip_contents = get_zip_contents(zip_file_path)
 
-        expect(zip_contents).to match_array(files_to_include)
+          expect(zip_contents).to match_array(files_to_include)
+        end
+      end
+
+      context 'an offline buildpack' do
+        let(:buildpack_mode) { :offline }
+
+        specify do
+          Packager.package(buildpack)
+
+          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-offline-v1.2.3.zip')
+          zip_contents = get_zip_contents(zip_file_path)
+          dependencies = ["dependencies/file____etc_hosts"]
+
+          expect(zip_contents).to match_array(files_to_include + dependencies)
+        end
       end
     end
   end
