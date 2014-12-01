@@ -101,15 +101,15 @@ function __package_dependencies {
     done
 }
 
-function __build_zip_exclusion_string {
-    zip_exclude_string=''
-    for excluded_file in ${excluded_files[@]}
-    do
-       zip_exclude_string="$zip_exclude_string --exclude=*${excluded_file}*"
-    done
-
-    echo ${zip_exclude_string}
-}
+#function __build_zip_exclusion_string {
+#    zip_exclude_string=''
+#    for excluded_file in ${excluded_files[@]}
+#    do
+#       zip_exclude_string="$zip_exclude_string --exclude=*${excluded_file}*"
+#    done
+#
+#    echo ${zip_exclude_string}
+#}
 
 #function __generate_filename {
 #    version=$(cat ${BASE_PATH}/VERSION)

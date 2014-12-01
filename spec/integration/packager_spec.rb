@@ -30,12 +30,15 @@ module Buildpack
 
     let(:tmp_dir) { Dir.mktmpdir }
     let(:buildpack_dir) { File.join(tmp_dir, 'sample-buildpack-root-dir') }
+    let(:cache_dir) { File.join(tmp_dir, 'cache-dir') }
     let(:buildpack) {
       {
           root_dir: buildpack_dir,
           mode: buildpack_mode,
           language: 'sample',
-          dependencies: ["file:///etc/hosts"]
+          dependencies: ["file:///etc/hosts"],
+          exclude_files: files_to_exclude,
+          cache_dir: cache_dir
       }
     }
     let(:files_to_include) {
@@ -47,10 +50,19 @@ module Buildpack
       ]
     }
 
+    let(:files_to_exclude) {
+      [
+          '.gitignore'
+      ]
+    }
+
+    let(:files) { files_to_include + files_to_exclude }
+    let(:cached_file) { File.join(cache_dir, 'file____etc_hosts') }
+
     before do
       make_fake_files(
           buildpack_dir,
-          files_to_include,
+          files
       )
       `echo "1.2.3" > #{File.join(buildpack_dir, 'VERSION')}`
     end
@@ -111,25 +123,90 @@ module Buildpack
         end
       end
     end
+
+    describe 'excluded files' do
+      let(:buildpack_mode) { :online }
+
+      specify do
+        Packager.package(buildpack)
+
+        zip_file_path = File.join(buildpack_dir, 'sample_buildpack-online-v1.2.3.zip')
+        zip_contents = get_zip_contents(zip_file_path)
+
+        expect(zip_contents).to_not include(*files_to_exclude)
+      end
+    end
+
+    describe 'caching of dependencies' do
+      context 'an online buildpack' do
+        let(:buildpack_mode) { :online }
+
+        specify do
+          Packager.package(buildpack)
+
+          expect(File).to_not exist(cached_file)
+        end
+      end
+
+      context 'an offline buildpack' do
+        let(:buildpack_mode) { :offline }
+
+        context 'by default' do
+          specify do
+            expect(Packager).to receive(:download_file).once.and_call_original
+            Packager.package(buildpack)
+          end
+        end
+
+        context 'with the cache option enabled' do
+          context 'cached file does not exist' do
+            specify do
+              expect(Packager).to receive(:download_file).once.and_call_original
+              Packager.package(buildpack.merge(cache: true))
+            end
+          end
+
+          context 'on subsequent calls' do
+            it 'uses the cached file instead of downloading it again' do
+              expect(Packager).to receive(:download_file).once.and_call_original
+              Packager.package(buildpack.merge(cache: true))
+              Packager.package(buildpack.merge(cache: true))
+            end
+          end
+        end
+      end
+    end
+
+    describe 'existence of zip' do
+      let(:buildpack_mode) {:online}
+
+      context 'zip is installed' do
+        specify do
+          expect{Packager.package(buildpack)}.not_to raise_error
+        end
+      end
+
+      context 'zip is not installed' do
+        specify do
+          expect(Open3).to receive(:capture3).with("which zip").and_return(['', '', 'exit 1'])
+          expect{Packager.package(buildpack)}.to raise_error(RuntimeError)
+        end
+      end
+    end
   end
 
   # yet to test.
-  # - exclude files user does not want
-  # - if offline, download dependencies - use url translation
-  # - make sure side effects do not appear in buildpack folder (Eg, create a temp directory and clone buildpack)
-  # - local download caching (deps are cached on the buildpack developers machine)
-  #    - Support both OSX and Linux Caching directories - not easily tested
-  # - use-cache option (only valid in offline mode)
-  # - complain if zip is missing
+  # X exclude files user does not want
+  # X if offline, download dependencies - use url translation
+  # X make sure side effects do not appear in buildpack folder (Eg, create a temp directory and clone buildpack)
+  # X local download caching (deps are cached on the buildpack developers machine)
+  #    SKIPPED - Support both OSX and Linux Caching directories - not easily tested
+  # X use-cache option (only valid in offline mode)
+  # X complain if zip is missing
 
   # unprovable
   # - really did use a seperate tmp dir
   # - cleaned up tmp dir after
-
-
-
-
-
 
 
 end
