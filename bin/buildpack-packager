@@ -1,16 +1,13 @@
 #!/usr/bin/env ruby
-$LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
+require 'yaml'
+require 'active_support/core_ext/hash/indifferent_access'
 require 'buildpack/packager'
 
-BP_EXCLUDED_FILES=$excluded_files
-BP_DEPENDENCIES=$dependencies
+manifest = YAML.load_file('manifest.yml').with_indifferent_access
 
-buildpack = {
-    root_dir: `pwd`.chomp,
-    language: ARGV[0],
-    dependencies: ARGV[1].split(","),
-    exclude_files: ARGV[2].split(","),
-    mode: ARGV[3].to_sym
-}
+manifest.merge!({
+                    root_dir: `pwd`.chomp,
+                    mode: ARGV[0].to_sym
+                })
 
-Buildpack::Packager.package(buildpack)
+Buildpack::Packager.package(manifest)

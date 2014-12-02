@@ -1,41 +1,50 @@
 BUILDPACK PACKAGER
 
-Bash library to package up buildpack source and included dependencies
+Simple tool to package a buildpack to upload to Cloud Foundry.
 
-Dependencies will be downloaded and zipped if the mode is offline
-Excluded files will not be zipped
-Version will be gotten from $BIN_PATH/version
+Usage
+=====
 
-Usage:
+1. Create a ```manifest.yml``` in your buildpack
+1. Run the packager for online or offline mode
+```buildpack-packager [offline|online]
 
-Add buildpack_packager as a submodule of your buildpack
+In either mode, the packager will add (almost) everything in your buildpack directory into a zip file.
+It will exclude anything marked for exclusion in your manifest.
 
+In offline mode, the packager will download and add dependencies as described in the manifest.
+
+Manifest
+========
+
+The packager looks for a ```manifest.yml``` file in the current working directory, which should be the root of your
+ buildpack.
+
+A sample manifest (all keys are required):
+
+```yaml
+---
+language: awesomelang
+dependencies:
+- http://example.com/path/to/dependency
+- http://example.com/path/to/another_dependency
+exclude_files:
+- .gitignore
+- private.key
 ```
-git submodule add https://github.com/cf-buildpacks/buildpack-packager
-```
 
-Create a script in your buildpack called 'bin/package' and include the following in it:
+language (required)
+--------
+The language key is used to give your zip file a meaningful name.
 
-```bash
-language='squeak'
+dependencies (required)
+------------
+The dependencies key specifies the urls which the buildpack attempts to download during staging. By specifying them here,
+the packager can download them and install them into the ```dependencies/``` folder in the zip file.
 
-dependencies=(
-  'http://ftp.squeak.org/4.5/Squeak-4.5-All-in-One.zip'
-)
+To have your buildpack use these 'cached' dependencies, use ```compile_extensions/bin/translate_dependency_url``` to
+ trick curl into loading the file. Read more on the [compile-extensions repo](https://github.com/cf-buildpacks/compile-extensions/).
 
-excluded_files=(
-  '.git/'
-  '.gitignore'
-)
-
-oifs=$IFS
-IFS=','
-$BIN/../buildpack-packager/bin/buildpack-packager $language "${dependencies[*]}" "${excluded_files[*]}" $1
-IFS=$oifs
-```
-
-run the packager:
-
-```
-./bin/package [online|offline]
-```
+exclude_files (required)
+-------------
+The exclude key lists files you do not want in your buildpack. This is useful to remove sensitive information before uploading.

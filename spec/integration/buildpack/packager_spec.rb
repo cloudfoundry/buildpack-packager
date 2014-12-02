@@ -1,33 +1,8 @@
 require 'spec_helper'
 require 'tmpdir'
-require 'zip'
-
-# TODO pull out as helper
-def make_fake_files(root, file_list)
-  file_list.each do |file|
-    full_path = File.join(root, file)
-    `mkdir -p #{File.dirname(full_path)}`
-    `echo 'a' > #{full_path}`
-  end
-end
-
-def all_files(root)
-  `tree -afi --noreport #{root}`.
-      split("\n").
-      map { |filename| filename.gsub(root, "").gsub(/^\//, "") }
-end
-
-def get_zip_contents(zip_path)
-  Zip::File.open(zip_path) do |zip_file|
-    zip_file.
-        map { |entry| entry.name }.
-        select { |name| name[/\/$/].nil? }
-  end
-end
 
 module Buildpack
   describe Packager do
-
     let(:tmp_dir) { Dir.mktmpdir }
     let(:buildpack_dir) { File.join(tmp_dir, 'sample-buildpack-root-dir') }
     let(:cache_dir) { File.join(tmp_dir, 'cache-dir') }
@@ -36,7 +11,7 @@ module Buildpack
           root_dir: buildpack_dir,
           mode: buildpack_mode,
           language: 'sample',
-          dependencies: ["file:///etc/hosts"],
+          dependencies: ['file:///etc/hosts'],
           exclude_files: files_to_exclude,
           cache_dir: cache_dir
       }
