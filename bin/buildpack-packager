@@ -1,3 +1,16 @@
 #!/usr/bin/env ruby
-
+$LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 require 'buildpack/packager'
+
+BP_EXCLUDED_FILES=$excluded_files
+BP_DEPENDENCIES=$dependencies
+
+buildpack = {
+    root_dir: `pwd`.chomp,
+    language: ARGV[0],
+    dependencies: ARGV[1].split(","),
+    exclude_files: ARGV[2].split(","),
+    mode: ARGV[3].to_sym
+}
+
+Buildpack::Packager.package(buildpack)
