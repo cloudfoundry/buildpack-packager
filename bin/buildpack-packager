@@ -3,6 +3,11 @@ require 'yaml'
 require 'active_support/core_ext/hash/indifferent_access'
 require 'buildpack/packager'
 
+unless File.exist?('manifest.yml')
+  STDERR.puts 'Could not find manifest.yml'
+  exit 1
+end
+
 manifest = YAML.load_file('manifest.yml').with_indifferent_access
 
 manifest.merge!({

@@ -1,11 +1,28 @@
 require 'spec_helper'
 require 'tmpdir'
 require 'yaml'
+require 'open3'
 
 describe 'buildpack_packager binary' do
   def run_packager_binary
     packager_binary_file = "#{`pwd`.chomp}/bin/buildpack-packager"
-    `cd #{buildpack_dir} && #{packager_binary_file} #{mode}`
+    Open3.capture3("cd #{buildpack_dir} && #{packager_binary_file} #{mode}")
+  end
+
+  def create_manifest
+    File.open(File.join(buildpack_dir, 'manifest.yml'), 'w') do |manifest_file|
+      manifest_file.write <<-MANIFEST
+---
+language: sample
+dependencies:
+- file://#{remote_dependencies_dir}/dep1.txt
+exclude_files:
+- .gitignore
+- lib/ephemeral_junkpile
+      MANIFEST
+    end
+
+    files_to_include << 'manifest.yml'
   end
 
   let(:tmp_dir) { Dir.mktmpdir }
@@ -18,8 +35,7 @@ describe 'buildpack_packager binary' do
         'VERSION',
         'README.md',
         'lib/sai.to',
-        'lib/rash',
-        'manifest.yml'
+        'lib/rash'
     ]
   }
 
@@ -36,7 +52,6 @@ describe 'buildpack_packager binary' do
     ['dep1.txt']
   }
 
-
   before do
     make_fake_files(
         remote_dependencies_dir,
@@ -49,56 +64,62 @@ describe 'buildpack_packager binary' do
     )
 
     `echo "1.2.3" > #{File.join(buildpack_dir, 'VERSION')}`
-
-    File.open(File.join(buildpack_dir, 'manifest.yml'), 'w') do |manifest_file|
-      manifest_file.write <<-MANIFEST
----
-language: sample
-dependencies:
-- file://#{remote_dependencies_dir}/dep1.txt
-exclude_files:
-- .gitignore
-- lib/ephemeral_junkpile
-      MANIFEST
-    end
   end
 
   after do
     FileUtils.remove_entry tmp_dir
   end
 
-  describe 'the zip file contents' do
-    context 'an online buildpack' do
-      let(:mode) { 'online' }
+  context 'without a manifest' do
+    let(:mode) { 'online' }
 
-      specify do
-        run_packager_binary
+    specify do
+      stdout, stderr, status = run_packager_binary
 
-        zip_file_path = File.join(buildpack_dir, 'sample_buildpack-online-v1.2.3.zip')
-        zip_contents = get_zip_contents(zip_file_path)
-
-        expect(zip_contents).to match_array(files_to_include)
-      end
-    end
-
-    context 'an offline buildpack' do
-      let(:mode) { 'offline' }
-
-      specify do
-        run_packager_binary
-
-        zip_file_path = File.join(buildpack_dir, 'sample_buildpack-offline-v1.2.3.zip')
-        zip_contents = get_zip_contents(zip_file_path)
-
-        dependencies_with_translation = dependencies.
-            map { |dep| "file://#{remote_dependencies_dir}/#{dep}"}.
-            map { |path| path.gsub(/[:\/]/, '_') }
-
-        deps_with_path = dependencies_with_translation.map { |dep| "dependencies/#{dep}" }
-
-        expect(zip_contents).to match_array(files_to_include + deps_with_path)
-      end
+      expect(stderr).to include('Could not find manifest.yml')
+      expect(status).not_to be_success
     end
   end
 
+  context 'with a manifest' do
+    before do
+      create_manifest
+    end
+
+    describe 'the zip file contents' do
+      context 'an online buildpack' do
+        let(:mode) { 'online' }
+
+        specify do
+          stdout, stderr, status = run_packager_binary
+
+          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-online-v1.2.3.zip')
+          zip_contents = get_zip_contents(zip_file_path)
+
+          expect(zip_contents).to match_array(files_to_include)
+          expect(status).to be_success
+        end
+      end
+
+      context 'an offline buildpack' do
+        let(:mode) { 'offline' }
+
+        specify do
+          stdout, stderr, status = run_packager_binary
+
+          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-offline-v1.2.3.zip')
+          zip_contents = get_zip_contents(zip_file_path)
+
+          dependencies_with_translation = dependencies.
+              map { |dep| "file://#{remote_dependencies_dir}/#{dep}" }.
+              map { |path| path.gsub(/[:\/]/, '_') }
+
+          deps_with_path = dependencies_with_translation.map { |dep| "dependencies/#{dep}" }
+
+          expect(zip_contents).to match_array(files_to_include + deps_with_path)
+          expect(status).to be_success
+        end
+      end
+    end
+  end
 end
