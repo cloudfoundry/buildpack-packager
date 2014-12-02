@@ -180,35 +180,37 @@ module Buildpack
     end
 
     describe 'existence of zip' do
-      let(:buildpack_mode) {:online}
+      let(:buildpack_mode) { :online }
 
       context 'zip is installed' do
         specify do
-          expect{Packager.package(buildpack)}.not_to raise_error
+          expect { Packager.package(buildpack) }.not_to raise_error
         end
       end
 
       context 'zip is not installed' do
+        before do
+          allow(Open3).to receive(:capture3).
+                              with("which zip").
+                              and_return(['', '', 'exit 1'])
+        end
+
         specify do
-          expect(Open3).to receive(:capture3).with("which zip").and_return(['', '', 'exit 1'])
-          expect{Packager.package(buildpack)}.to raise_error(RuntimeError)
+          expect { Packager.package(buildpack) }.to raise_error(RuntimeError)
+        end
+      end
+    end
+
+    describe 'avoid changing state of buildpack folder, other than creating the artifact (.zip)' do
+      context 'create an offline buildpack' do
+        let(:buildpack_mode) { :offline }
+
+        specify 'user does not see dependencies directory in their buildpack folder' do
+          Packager.package(buildpack)
+
+          expect(all_files(buildpack_dir)).not_to include("dependencies")
         end
       end
     end
   end
-
-  # yet to test.
-  # X exclude files user does not want
-  # X if offline, download dependencies - use url translation
-  # X make sure side effects do not appear in buildpack folder (Eg, create a temp directory and clone buildpack)
-  # X local download caching (deps are cached on the buildpack developers machine)
-  #    SKIPPED - Support both OSX and Linux Caching directories - not easily tested
-  # X use-cache option (only valid in offline mode)
-  # X complain if zip is missing
-
-  # unprovable
-  # - really did use a seperate tmp dir
-  # - cleaned up tmp dir after
-
-
 end
