@@ -46,7 +46,6 @@ module Buildpack
       FileUtils.remove_entry tmp_dir
     end
 
-
     describe 'a well formed zip file name' do
       context 'an online buildpack' do
         let(:buildpack_mode) { :online }
@@ -54,7 +53,7 @@ module Buildpack
         specify do
           Packager.package(buildpack)
 
-          expect(all_files(buildpack_dir)).to include('sample_buildpack-online-v1.2.3.zip')
+          expect(all_files(buildpack_dir)).to include('sample_buildpack-v1.2.3.zip')
         end
       end
 
@@ -77,7 +76,7 @@ module Buildpack
         specify do
           Packager.package(buildpack)
 
-          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-online-v1.2.3.zip')
+          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
 
           expect(zip_contents).to match_array(files_to_include)
@@ -105,7 +104,7 @@ module Buildpack
       specify do
         Packager.package(buildpack)
 
-        zip_file_path = File.join(buildpack_dir, 'sample_buildpack-online-v1.2.3.zip')
+        zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
         zip_contents = get_zip_contents(zip_file_path)
 
         expect(zip_contents).to_not include(*files_to_exclude)

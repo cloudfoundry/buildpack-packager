@@ -15,25 +15,39 @@ module Buildpack
       def execute!
         check_for_zip
 
-        buildpack_version = File.read("#{buildpack[:root_dir]}/VERSION").chomp
-        zip_file_name = "#{buildpack[:root_dir]}/#{buildpack[:language]}_buildpack-#{buildpack[:mode]}-v#{buildpack_version}.zip"
-
         Dir.mktmpdir do |temp_dir|
           copy_buildpack_to_temp_dir(temp_dir)
 
           build_dependencies(temp_dir) if buildpack[:mode] == :offline
-          build_zip_file(zip_file_name, temp_dir)
+          build_zip_file(zip_file_path, temp_dir)
         end
       end
 
       private
-      def copy_buildpack_to_temp_dir(temp_dir)
-        `cp -r #{buildpack[:root_dir]}/* #{temp_dir}`
+      def zip_file_path
+        File.join(buildpack[:root_dir], zip_file_name)
       end
 
-      def build_zip_file(zip_file_name, temp_dir)
+      def zip_file_name
+        "#{buildpack[:language]}_buildpack#{offline_identifier}-v#{buildpack_version}.zip"
+      end
+
+      def buildpack_version
+        File.read("#{buildpack[:root_dir]}/VERSION").chomp
+      end
+
+      def offline_identifier
+        return '' unless buildpack[:mode] == :offline
+        '-offline'
+      end
+
+      def copy_buildpack_to_temp_dir(temp_dir)
+        FileUtils.cp_r(File.join(buildpack[:root_dir], '.'), temp_dir)
+      end
+
+      def build_zip_file(zip_file_path, temp_dir)
         exclude_files = buildpack[:exclude_files].collect { |e| "--exclude=*#{e}*" }.join(" ")
-        `cd #{temp_dir} && zip -r #{zip_file_name} ./ #{exclude_files}`
+        `cd #{temp_dir} && zip -r #{zip_file_path} ./ #{exclude_files}`
       end
 
       def build_dependencies(temp_dir)

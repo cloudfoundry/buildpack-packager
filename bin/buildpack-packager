@@ -3,6 +3,12 @@ require 'yaml'
 require 'active_support/core_ext/hash/indifferent_access'
 require 'buildpack/packager'
 
+unless ARGV.length > 0
+  STDERR.puts "Usage:"
+  STDERR.puts "  #{File.basename(__FILE__)} online|offline"
+  exit 1
+end
+
 unless File.exist?('manifest.yml')
   STDERR.puts 'Could not find manifest.yml'
   exit 1

@@ -81,6 +81,18 @@ exclude_files:
     end
   end
 
+  describe 'usage' do
+    context 'without a mode parameter' do
+      let(:mode) { "" }
+      specify do
+        stdout, stderr, status = run_packager_binary
+
+        expect(stderr).to include("Usage:\n  buildpack-packager online|offline")
+        expect(status).not_to be_success
+      end
+    end
+  end
+
   context 'with a manifest' do
     before do
       create_manifest
@@ -93,7 +105,7 @@ exclude_files:
         specify do
           stdout, stderr, status = run_packager_binary
 
-          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-online-v1.2.3.zip')
+          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
 
           expect(zip_contents).to match_array(files_to_include)
