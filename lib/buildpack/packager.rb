@@ -51,7 +51,7 @@ module Buildpack
       end
 
       def build_dependencies(temp_dir)
-        cache_directory = buildpack[:cache_dir] || "~/.buildpack-packager/cache"
+        cache_directory = buildpack[:cache_dir] || "#{ENV['HOME']}/.buildpack-packager/cache"
         FileUtils.mkdir_p(cache_directory)
 
         dependency_dir = File.join(temp_dir, "dependencies")

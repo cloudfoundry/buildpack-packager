@@ -74,7 +74,7 @@ exclude_files:
     let(:mode) { 'online' }
 
     specify do
-      stdout, stderr, status = run_packager_binary
+      _, stderr, status = run_packager_binary
 
       expect(stderr).to include('Could not find manifest.yml')
       expect(status).not_to be_success
@@ -85,9 +85,9 @@ exclude_files:
     context 'without a mode parameter' do
       let(:mode) { "" }
       specify do
-        stdout, stderr, status = run_packager_binary
+        stdout, _, status = run_packager_binary
 
-        expect(stderr).to include("Usage:\n  buildpack-packager online|offline")
+        expect(stdout).to include("Usage:\n  buildpack-packager online|offline")
         expect(status).not_to be_success
       end
     end

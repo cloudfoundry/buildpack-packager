@@ -2,10 +2,21 @@
 require 'yaml'
 require 'active_support/core_ext/hash/indifferent_access'
 require 'buildpack/packager'
+require 'optparse'
+
+options = {}
+usage_msg = "Usage:\n  #{File.basename(__FILE__)} online|offline"
+
+OptionParser.new do |opts|
+  opts.banner = usage_msg
+
+  opts.on("--use-cache", "Cache depepndencies locally") do |use_cache|
+    options[:cache] = use_cache
+  end
+end.parse!
 
 unless ARGV.length > 0
-  STDERR.puts "Usage:"
-  STDERR.puts "  #{File.basename(__FILE__)} online|offline"
+  STDOUT.puts usage_msg
   exit 1
 end
 
@@ -18,7 +29,9 @@ manifest = YAML.load_file('manifest.yml').with_indifferent_access
 
 manifest.merge!({
                     root_dir: `pwd`.chomp,
-                    mode: ARGV[0].to_sym
+                    mode: ARGV[0].to_sym,
                 })
+
+manifest.merge! options
 
 Buildpack::Packager.package(manifest)
