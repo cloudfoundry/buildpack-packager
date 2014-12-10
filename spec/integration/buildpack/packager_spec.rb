@@ -111,6 +111,18 @@ module Buildpack
 
         expect(zip_contents).to_not include(*files_to_exclude)
       end
+
+      context 'when appending an exclusion for the zip file' do
+        specify do
+          Packager.package(buildpack)
+          Packager.package(buildpack.merge(exclude_files: files_to_exclude + ['VERSION']))
+
+          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
+          zip_contents = get_zip_contents(zip_file_path)
+
+          expect(zip_contents).to_not include('VERSION')
+        end
+      end
     end
 
     describe 'caching of dependencies' do

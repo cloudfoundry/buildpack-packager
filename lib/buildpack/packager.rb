@@ -47,6 +47,7 @@ module Buildpack
 
       def build_zip_file(zip_file_path, temp_dir)
         exclude_files = buildpack[:exclude_files].collect { |e| "--exclude=*#{e}*" }.join(" ")
+        `rm -rf #{zip_file_path}`
         `cd #{temp_dir} && zip -r #{zip_file_path} ./ #{exclude_files}`
       end
 
