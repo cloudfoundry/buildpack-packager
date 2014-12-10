@@ -11,7 +11,9 @@ module Buildpack
           root_dir: buildpack_dir,
           mode: buildpack_mode,
           language: 'sample',
-          dependencies: ['file:///etc/hosts'],
+          dependencies: [{
+                             'uri' => 'file:///etc/hosts'
+                         }],
           exclude_files: files_to_exclude,
           cache_dir: cache_dir
       }

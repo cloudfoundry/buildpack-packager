@@ -57,12 +57,12 @@ module Buildpack
         dependency_dir = File.join(temp_dir, "dependencies")
         FileUtils.mkdir_p(dependency_dir)
 
-        buildpack[:dependencies].each do |url|
-          translated_filename = url.gsub(/[:\/]/, '_')
+        buildpack[:dependencies].each do |dependency|
+          translated_filename = dependency['uri'].gsub(/[:\/]/, '_')
 
           cached_file = File.expand_path(File.join(cache_directory, translated_filename))
           if !buildpack[:cache] || !File.exist?(cached_file)
-            download_file(url, cached_file)
+            download_file(dependency['uri'], cached_file)
           end
 
           FileUtils.cp(cached_file, dependency_dir)

@@ -15,7 +15,11 @@ describe 'buildpack_packager binary' do
 ---
 language: sample
 dependencies:
-- file://#{remote_dependencies_dir}/dep1.txt
+-
+  version: 1.0
+  name: fake_name
+  uri: file://#{remote_dependencies_dir}/dep1.txt
+
 exclude_files:
 - .gitignore
 - lib/ephemeral_junkpile
