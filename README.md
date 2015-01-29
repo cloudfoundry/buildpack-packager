@@ -23,7 +23,8 @@ Usage - Buildpack Developers
 1. Create a ```manifest.yml``` in the root of your buildpack.
   1. Read [the manifest](#manifest) documentation below on how to structure this file
 1. Run the packager for online or offline mode
-```buildpack-packager [offline|online]
+
+   ```buildpack-packager [offline|online]```
 
 In either mode, the packager adds (almost) everything in your buildpack directory into a zip file.
 It excludes anything marked for exclusion in your manifest.
@@ -82,7 +83,9 @@ The dependencies key specifies the name, version, and uri of a resource which th
 to download during staging. By specifying them here, the packager downloads them and 
 install them into the ```dependencies/``` folder in the zip file.
 
-To have your buildpack use these 'cached' dependencies, use ```compile_extensions/bin/translate_dependency_url``` to translate the url into a locally cached url (useful for offline mode).
+Rewrite your buildpack to use these 'cached' dependencies. We provide ```compile_extensions/bin/translate_dependency_url``` as a means to using dependencies in either cached or 
+uncached buildpacks.
+
 Learn more on the [compile-extensions repo](https://github.com/cf-buildpacks/compile-extensions/).
 
 exclude_files (required)
