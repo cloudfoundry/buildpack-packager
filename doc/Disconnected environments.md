@@ -1,10 +1,12 @@
-# Cache dependencies with existing Cloud Foundry Buildpacks
+# Disconnected environments
 
-### App Dependencies in Cached Mode
+### Deploying Apps on disconnected environments
+Cached buildpacks only ensure that a the buildpacks dependencies are cached, not your applications.
+
 When you work with a disconnected environment, it's important to use your package manager
 to 'vendor' your applications dependencies.
 
-The specific mechanism varies between platforms.
+The specific mechanism varies between platforms. See your buildpack's documentation for 'vendoring' advice.
 
 ## Building a cached buildpack
 1. Make sure you have fetched submodules
@@ -45,3 +47,4 @@ The specific mechanism varies between platforms.
   ```shell
   cf create-buildpack custom_ruby_buildpack ruby_buildpack-offline-custom.zip 1
   ```
+
