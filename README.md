@@ -2,10 +2,14 @@ BUILDPACK PACKAGER
 
 Simple tool to package a buildpack to upload to Cloud Foundry.
 
-Usage
-=====
+Usage - Buildpack Developers
+============================
 
-1. Create a ```manifest.yml``` in your buildpack
+This documentation is for developers who are adding cached dependencies to their buildpack. If you are using
+an existing buildpack maintained by Cloud Foundry, please see [Cloud Foundry buildpack usage](doc/cloud_foundry_buildpack_usage.md)
+
+1. Create a ```manifest.yml``` in the root of your buildpack.
+  1. Read [the manifest](#manifest) documentation below on how to structure this file
 1. Run the packager for online or offline mode
 ```buildpack-packager [offline|online]
 
