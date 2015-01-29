@@ -1,28 +1,48 @@
 # BUILDPACK PACKAGER
 
-Simple tool to package a buildpack to upload to Cloud Foundry.
+The purpose of buildpack-packager is to cache system dependencies for partially or fully
+disconnected environments.
+
+Historically, this was called 'offline' mode.
+It is now called 'Cached dependencies', although you see references to 'offline' and 'online'
+as we continue to standardize.
+
+Cached buildpacks are used in any environment where you prefer cached dependencies 
+instead of reaching out to the internet while an app stages.
+
+The list of what is cached is maintained in [the manifest](../README.md#manifest).
+
+Usage - Cloud Foundry Buildpacks
+================================
+If you are using an existing buildpack maintained by Cloud Foundry, 
+please see [Cloud Foundry buildpack usage](doc/cloud_foundry_buildpack_usage.md)
 
 Usage - Buildpack Developers
 ============================
-
-This documentation is for developers who are adding cached dependencies to their buildpack. If you are using
-an existing buildpack maintained by Cloud Foundry, please see [Cloud Foundry buildpack usage](doc/cloud_foundry_buildpack_usage.md)
 
 1. Create a ```manifest.yml``` in the root of your buildpack.
   1. Read [the manifest](#manifest) documentation below on how to structure this file
 1. Run the packager for online or offline mode
 ```buildpack-packager [offline|online]
 
-In either mode, the packager will add (almost) everything in your buildpack directory into a zip file.
-It will exclude anything marked for exclusion in your manifest.
+In either mode, the packager adds (almost) everything in your buildpack directory into a zip file.
+It excludes anything marked for exclusion in your manifest.
 
-In offline mode, the packager will download and add dependencies as described in the manifest.
+In offline mode, the packager downloads and adds dependencies as described in the manifest.
+
+### Loading dependencies, cached or uncached
+To load the correct dependencies, use the 
+[translate_dependency_url executable](https://github.com/cf-buildpacks/compile-extensions/blob/master/bin/translate_dependency_url).
+
+Currently, we recommend submoduling the 
+[buildpack compile extensions](https://github.com/cf-buildpacks/compile-extensions) into
+your buildpack. See our [go buildpack](https://github.com/cloudfoundry/go-buildpack) for 
+an example set up.
 
 Manifest
 ========
-
-The packager looks for a ```manifest.yml``` file in the current working directory, which should be the root of your
- buildpack.
+The packager uses the ```manifest.yml``` file in the current working directory.  
+Create this file in the root of your buildpack.
 
 A sample manifest (all keys are required):
 
@@ -50,7 +70,7 @@ exclude_files:
 
 language (required)
 --------
-The language key is used to give your zip file a meaningful name.
+The language key gives your zip file a meaningful name.
 
 url_to_dependency_map (required)
 ---------
@@ -58,12 +78,14 @@ A list of regular expressions that extract and map the values of `name` and `ver
 
 dependencies (required)
 ------------
-The dependencies key specifies the name, version, and uri of a resource which the buildpack attempts to download during staging. By specifying them here,
-the packager can download them and install them into the ```dependencies/``` folder in the zip file.
+The dependencies key specifies the name, version, and uri of a resource which the buildpack attempts 
+to download during staging. By specifying them here, the packager downloads them and 
+install them into the ```dependencies/``` folder in the zip file.
 
 To have your buildpack use these 'cached' dependencies, use ```compile_extensions/bin/translate_dependency_url``` to translate the url into a locally cached url (useful for offline mode).
-Read more on the [compile-extensions repo](https://github.com/cf-buildpacks/compile-extensions/).
+Learn more on the [compile-extensions repo](https://github.com/cf-buildpacks/compile-extensions/).
 
 exclude_files (required)
 -------------
-The exclude key lists files you do not want in your buildpack. This is useful to remove sensitive information before uploading.
+The exclude key lists files you do not want in your buildpack. Use the exclude key to
+remove sensitive information before uploading.
