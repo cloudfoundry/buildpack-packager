@@ -15,7 +15,7 @@ The list of what is cached is maintained in [the manifest](../README.md#manifest
 Usage - Cloud Foundry Buildpacks
 ================================
 If you are using an existing buildpack maintained by Cloud Foundry, 
-please see [Cloud Foundry buildpack usage](doc/cloud_foundry_buildpack_usage.md)
+please see the [disconnected environments documentation](doc/disconnected_environments.md)
 
 Usage - Buildpack Developers
 ============================
