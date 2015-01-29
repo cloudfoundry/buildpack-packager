@@ -1,4 +1,4 @@
-BUILDPACK PACKAGER
+# BUILDPACK PACKAGER
 
 Simple tool to package a buildpack to upload to Cloud Foundry.
 
