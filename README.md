@@ -10,7 +10,7 @@ as we continue to standardize.
 Cached buildpacks are used in any environment where you prefer cached dependencies 
 instead of reaching out to the internet while an app stages.
 
-The list of what is cached is maintained in [the manifest](../README.md#manifest).
+The list of what is cached is maintained in [the manifest](https://github.com/cloudfoundry-incubator/buildpack-packager#manifest).
 
 Usage - Cloud Foundry Buildpacks
 ================================
