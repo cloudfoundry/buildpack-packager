@@ -33,6 +33,9 @@ mapping:
          "uri":
            type: str
            required:  yes
+         "md5":
+           type: str
+           required:  yes
          "cf_stacks":
            type: seq
            required:  yes
