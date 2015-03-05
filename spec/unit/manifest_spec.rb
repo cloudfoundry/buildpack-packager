@@ -9,7 +9,26 @@ def status_code url
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
   end
-  http.head(uri.request_uri).code.to_i rescue 600
+
+  begin
+    status_code = http.head(uri.request_uri).code.to_i
+    return status_code unless 404 #if doesn't support head requests
+
+    Net::HTTP.start(uri.host,
+                    uri.port,
+                    :use_ssl => uri.scheme == 'https'
+                   ) do |http|
+      request = Net::HTTP::Get.new uri
+
+      http.request request do |response|
+        return response.code.to_i
+      end
+    end
+
+  rescue
+    false
+  end
+
 end
 
 RSpec::Matchers.define :give_status_code do |expected|
