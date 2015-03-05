@@ -1,0 +1,46 @@
+type:       map
+mapping:
+  "language":
+    type:      str
+    required:  yes
+  "url_to_dependency_map":
+    type:      seq
+    required:  yes
+    sequence:
+      - type: map
+        mapping:
+         "match":
+           type: str
+           required:  yes
+         "name":
+           type: str
+           required:  yes
+         "version":
+           type: text
+           required:  yes
+  "dependencies":
+    type:      seq
+    required:  yes
+    sequence:
+      - type: map
+        mapping:
+         "name":
+           type: str
+           required:  yes
+         "version":
+           type: text
+           required:  yes
+         "uri":
+           type: str
+           required:  yes
+         "cf_stacks":
+           type: seq
+           required:  yes
+           sequence:
+             - type: str
+               enum: [ lucid64, cflinuxfs2 ]
+  "exclude_files":
+    type:      seq
+    required:  yes
+    sequence:
+      - type: str

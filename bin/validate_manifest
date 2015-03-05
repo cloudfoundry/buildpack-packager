@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+require 'rspec'
+
+32.times { puts "hello world" }
+
+config = RSpec.configuration
+config.color = true
+RSpec::Core::Runner.run(['./spec/unit/manifest_spec.rb'])
