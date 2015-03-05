@@ -1,4 +1,6 @@
-require_relative '../spec_helper'
+require 'yaml'
+require 'net/https'
+require 'kwalify'
 
 def status_code url
   uri = URI.parse(url)
@@ -30,13 +32,9 @@ describe 'Buildpack manifest' do
     YAML.load_file(manifest_path)
   end
 
-  it 'is present' do
-    expect(manifest).not_to be nil
-  end
-
   context 'schema validation' do
     before(:all) do
-      schema = Kwalify::Yaml.load_file("spec/fixtures/manifest_schema.yml")
+      schema = Kwalify::Yaml.load_file("#{File.dirname(__FILE__)}/../fixtures/manifest_schema.yml")
       validator = Kwalify::Validator.new(schema)
       @parser = Kwalify::Yaml::Parser.new(validator)
     end
