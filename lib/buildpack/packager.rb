@@ -5,6 +5,8 @@ require 'tmpdir'
 
 module Buildpack
   module Packager
+    class CheckSumError < StandardError; end
+
     def self.package(buildpack)
       package = Package.new(buildpack)
       package.execute!
@@ -18,7 +20,11 @@ module Buildpack
         Dir.mktmpdir do |temp_dir|
           copy_buildpack_to_temp_dir(temp_dir)
 
-          build_dependencies(temp_dir) if buildpack[:mode] == :offline
+          if buildpack[:mode] == :offline
+            build_dependencies(temp_dir)
+            validate_checksums_of_dependencies(temp_dir)
+          end
+
           build_zip_file(zip_file_path, temp_dir)
         end
       end
@@ -67,6 +73,24 @@ module Buildpack
           end
 
           FileUtils.cp(cached_file, dependency_dir)
+        end
+      end
+
+      def validate_checksums_of_dependencies(temp_dir)
+        dependency_dir = File.join(temp_dir, "dependencies")
+        buildpack[:dependencies].each do |dependency|
+          name = dependency['name']
+          version = dependency['version']
+          md5 = dependency['md5']
+          uri = dependency['uri']
+
+          translated_filename = uri.gsub(/[:\/]/, '_')
+          dependency = File.expand_path(File.join(dependency_dir, translated_filename))
+
+          if md5 != Digest::MD5.file(dependency).hexdigest
+            raise CheckSumError,
+              "File: #{name}, version: #{version} downloaded at location #{uri}\n\tis reporting a different checksum than the one specified in the manifest."
+          end
         end
       end
 

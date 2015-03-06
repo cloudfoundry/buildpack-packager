@@ -6,30 +6,36 @@ module Buildpack
     let(:tmp_dir) { Dir.mktmpdir }
     let(:buildpack_dir) { File.join(tmp_dir, 'sample-buildpack-root-dir') }
     let(:cache_dir) { File.join(tmp_dir, 'cache-dir') }
+    let(:file_location) { '/etc/hosts' }
+    let(:md5) { Digest::MD5.file(file_location).hexdigest }
+
     let(:buildpack) {
       {
-          root_dir: buildpack_dir,
-          mode: buildpack_mode,
-          language: 'sample',
-          dependencies: [{
-                             'uri' => 'file:///etc/hosts'
-                         }],
-          exclude_files: files_to_exclude,
-          cache_dir: cache_dir
+        root_dir: buildpack_dir,
+        mode: buildpack_mode,
+        language: 'sample',
+        dependencies: [{
+          'version' => '1.0',
+          'name' => 'etc_host',
+          'md5' => md5,
+          'uri' => "file://#{file_location}"
+        }],
+        exclude_files: files_to_exclude,
+        cache_dir: cache_dir
       }
     }
     let(:files_to_include) {
       [
-          'VERSION',
-          'README.md',
-          'lib/sai.to',
-          'lib/rash'
+        'VERSION',
+        'README.md',
+        'lib/sai.to',
+        'lib/rash'
       ]
     }
 
     let(:files_to_exclude) {
       [
-          '.gitignore'
+        '.gitignore'
       ]
     }
 
@@ -38,8 +44,8 @@ module Buildpack
 
     before do
       make_fake_files(
-          buildpack_dir,
-          files
+        buildpack_dir,
+        files
       )
       `echo "1.2.3" > #{File.join(buildpack_dir, 'VERSION')}`
     end
@@ -156,6 +162,8 @@ module Buildpack
           end
 
           context 'on subsequent calls' do
+            let(:cached_file) { File.join(cache_dir, "file____temp_file") }
+
             it 'uses the cached file instead of downloading it again' do
               Packager.package(buildpack.merge(cache: true))
               File.write(cached_file, 'a')
@@ -179,8 +187,8 @@ module Buildpack
       context 'zip is not installed' do
         before do
           allow(Open3).to receive(:capture3).
-                              with("which zip").
-                              and_return(['', '', 'exit 1'])
+            with("which zip").
+            and_return(['', '', 'exit 1'])
         end
 
         specify do

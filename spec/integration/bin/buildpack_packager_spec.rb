@@ -18,7 +18,8 @@ dependencies:
 -
   version: 1.0
   name: fake_name
-  uri: file://#{remote_dependencies_dir}/dep1.txt
+  md5: #{md5}
+  uri: file://#{file_location}
 
 exclude_files:
 - .gitignore
@@ -30,23 +31,24 @@ exclude_files:
   end
 
   let(:tmp_dir) { Dir.mktmpdir }
-
   let(:buildpack_dir) { File.join(tmp_dir, 'sample-buildpack-root-dir') }
   let(:remote_dependencies_dir) { File.join(tmp_dir, 'remote_dependencies') }
+  let(:file_location) { "#{remote_dependencies_dir}/dep1.txt" }
+  let(:md5) { Digest::MD5.file(file_location).hexdigest }
 
   let(:files_to_include) {
     [
-        'VERSION',
-        'README.md',
-        'lib/sai.to',
-        'lib/rash'
+      'VERSION',
+      'README.md',
+      'lib/sai.to',
+      'lib/rash'
     ]
   }
 
   let(:files_to_exclude) {
     [
-        '.gitignore',
-        'lib/ephemeral_junkpile'
+      '.gitignore',
+      'lib/ephemeral_junkpile'
     ]
   }
 
@@ -58,13 +60,13 @@ exclude_files:
 
   before do
     make_fake_files(
-        remote_dependencies_dir,
-        dependencies
+      remote_dependencies_dir,
+      dependencies
     )
 
     make_fake_files(
-        buildpack_dir,
-        files
+      buildpack_dir,
+      files
     )
 
     `echo "1.2.3" > #{File.join(buildpack_dir, 'VERSION')}`
@@ -103,6 +105,7 @@ exclude_files:
     end
 
     describe 'the zip file contents' do
+
       context 'an online buildpack' do
         let(:mode) { 'online' }
 
@@ -127,13 +130,23 @@ exclude_files:
           zip_contents = get_zip_contents(zip_file_path)
 
           dependencies_with_translation = dependencies.
-              map { |dep| "file://#{remote_dependencies_dir}/#{dep}" }.
-              map { |path| path.gsub(/[:\/]/, '_') }
+            map { |dep| "file://#{remote_dependencies_dir}/#{dep}" }.
+            map { |path| path.gsub(/[:\/]/, '_') }
 
-          deps_with_path = dependencies_with_translation.map { |dep| "dependencies/#{dep}" }
+            deps_with_path = dependencies_with_translation.map { |dep| "dependencies/#{dep}" }
 
-          expect(zip_contents).to match_array(files_to_include + deps_with_path)
-          expect(status).to be_success
+            expect(zip_contents).to match_array(files_to_include + deps_with_path)
+            expect(status).to be_success
+
+        end
+
+        context 'vendored dependencies with invalid checksums' do
+          let(:md5) { "InvalidMD5_123" }
+
+          specify do
+            _, _, status = run_packager_binary
+            expect(status).not_to be_success
+          end
         end
       end
     end
