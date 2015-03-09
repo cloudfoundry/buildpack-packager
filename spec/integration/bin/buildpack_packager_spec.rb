@@ -34,7 +34,23 @@ exclude_files:
   - lib/ephemeral_junkpile
 MANIFEST
     end
-    
+
+    files_to_include << 'manifest.yml'
+  end
+
+  def create_invalid_manifest
+    File.open(File.join(buildpack_dir, 'manifest.yml'), 'w') do |manifest_file|
+      manifest_file.write <<-MANIFEST
+---
+language: sample
+
+dependencies:
+  - name: fake_name
+    version: 1.2
+    uri: file://#{file_location}
+MANIFEST
+    end
+
     files_to_include << 'manifest.yml'
   end
 
@@ -91,6 +107,20 @@ MANIFEST
       _, stderr, status = run_packager_binary
 
       expect(stderr).to include('Could not find manifest.yml')
+      expect(status).not_to be_success
+    end
+  end
+
+  context 'with an invalid manifest' do
+    let(:mode) { 'online' }
+
+    before do
+      create_invalid_manifest
+    end
+
+    specify do
+      _, stderr, status = run_packager_binary
+      expect(stderr).to include('parser_error')
       expect(status).not_to be_success
     end
   end

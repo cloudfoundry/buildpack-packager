@@ -1,6 +1,0 @@
-#!/usr/bin/env ruby
-require 'rspec'
-
-config = RSpec.configuration
-config.color = true
-RSpec::Core::Runner.run(["#{File.dirname(__FILE__)}/../spec/unit/manifest_spec.rb"])

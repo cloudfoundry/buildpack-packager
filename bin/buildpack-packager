@@ -26,9 +26,9 @@ unless File.exist?('manifest.yml')
   exit 1
 end
 
-errors = Buildpack::ManifestValidator.validate('manifest.yml')
-if !errors.values.all? { |value| value.empty? }
-  puts errors
+validator = Buildpack::ManifestValidator.new('manifest.yml')
+unless validator.valid? #!errors.values.all? { |value| value.empty? }
+  STDERR.puts validator.errors
   exit 1
 end
 

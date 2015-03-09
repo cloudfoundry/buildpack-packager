@@ -3,12 +3,14 @@ require 'buildpack/manifest_validator'
 
 describe Buildpack::ManifestValidator do
   let(:manifest_path) { "#{File.dirname(__FILE__)}/../fixtures/manifests/#{manifest_file_name}" }
+  let(:validator) { Buildpack::ManifestValidator.new(manifest_path) }
 
   context 'with a valid manifest' do
     let(:manifest_file_name) { "manifest_valid.yml" }
 
     it 'reports valid manifests correctly' do
-      expect(Buildpack::ManifestValidator.valid?(manifest_path)).to be(true)
+      expect(validator.valid?).to be(true)
+      expect(validator.errors).to be_empty
     end
   end
 
@@ -16,17 +18,8 @@ describe Buildpack::ManifestValidator do
     let(:manifest_file_name) { "manifest_invalid-md6.yml" }
 
     it 'reports invalid manifests correctly' do
-      puts Buildpack::ManifestValidator.validate(manifest_path)
-      expect(Buildpack::ManifestValidator.valid?(manifest_path)).to be(false)
-    end
-  end
-
-  context 'with a manifest with a nonexistent uri' do
-    let(:manifest_file_name) { "manifest_invalid-uri.yml" }
-
-    it 'reports invalid manifests correctly' do
-      puts Buildpack::ManifestValidator.validate(manifest_path)
-      expect(Buildpack::ManifestValidator.valid?(manifest_path)).to be(false)
+      expect(validator.valid?).to be(false)
+      expect(validator.errors).not_to be_empty
     end
   end
 end
