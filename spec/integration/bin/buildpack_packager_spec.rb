@@ -14,19 +14,27 @@ describe 'buildpack_packager binary' do
       manifest_file.write <<-MANIFEST
 ---
 language: sample
+
+url_to_dependency_map:
+  - match: fake_name(\d+\.\d+(\.\d+)?)
+    name: fake_name
+    version: $1
+
 dependencies:
--
-  version: 1.0
-  name: fake_name
-  md5: #{md5}
-  uri: file://#{file_location}
+  - name: fake_name
+    version: 1.2
+    uri: file://#{file_location}
+    md5: #{md5}
+    cf_stacks:
+      - lucid64
+      - cflinuxfs2
 
 exclude_files:
-- .gitignore
-- lib/ephemeral_junkpile
-      MANIFEST
+  - .gitignore
+  - lib/ephemeral_junkpile
+MANIFEST
     end
-
+    
     files_to_include << 'manifest.yml'
   end
 

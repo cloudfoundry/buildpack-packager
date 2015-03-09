@@ -3,6 +3,7 @@ require 'yaml'
 require 'active_support/core_ext/hash/indifferent_access'
 require 'buildpack/packager'
 require 'optparse'
+require 'buildpack/manifest_validator'
 
 options = {}
 usage_msg = "Usage:\n  #{File.basename(__FILE__)} online|offline"
@@ -22,6 +23,12 @@ end
 
 unless File.exist?('manifest.yml')
   STDERR.puts 'Could not find manifest.yml'
+  exit 1
+end
+
+errors = Buildpack::ManifestValidator.validate('manifest.yml')
+if !errors.values.all? { |value| value.empty? }
+  puts errors
   exit 1
 end
 
