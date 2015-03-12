@@ -168,22 +168,39 @@ module Buildpack
           end
         end
 
-        context 'with the cache option enabled' do
-          context 'cached file does not exist' do
-            specify do
-              Packager.package(options.merge(cache: true))
+        context 'with the force download enabled' do
+          context 'and the cached file does not exist' do
+            it 'will write the cache file' do
+              Packager.package(options.merge(force_download: true))
               expect(File).to exist(cached_file)
             end
           end
 
           context 'on subsequent calls' do
-            let(:cached_file) { File.join(cache_dir, "file____temp_file") }
+            it 'does not use the cached file' do
+              Packager.package(options.merge(force_download: true))
+              File.write(cached_file, 'asdf')
+              Packager.package(options.merge(force_download: true))
+              expect(File.read(cached_file)).to_not eq 'asdf'
+            end
+          end
+        end
 
-            it 'uses the cached file instead of downloading it again' do
-              Packager.package(options.merge(cache: true))
-              File.write(cached_file, 'a')
-              Packager.package(options.merge(cache: true))
-              expect(File.read(cached_file)).to eq 'a'
+        context 'with the force download disabled' do
+          context 'and the cached file does not exist' do
+            it 'will write the cache file' do
+              Packager.package(options.merge(force_download: false))
+              expect(File).to exist(cached_file)
+            end
+          end
+
+          context 'on subsequent calls' do
+            it 'does use the cached file' do
+              Packager.package(options.merge(force_download: false))
+              File.write(cached_file, 'asdf')
+              expect do
+                Packager.package(options.merge(force_download: false))
+              end.to raise_error(Packager::CheckSumError)
             end
           end
         end

@@ -24,14 +24,15 @@ end
 options = {
   root_dir: `pwd`.chomp,
   manifest_path: 'manifest.yml',
-  mode: ARGV[0].to_sym
+  mode: ARGV[0].to_sym,
+  force_download: false
 }
 
 OptionParser.new do |opts|
   opts.banner = usage_msg
 
-  opts.on("--use-cache", "Cache depepndencies locally") do |use_cache|
-    options[:cache] = use_cache
+  opts.on("--force-download", "Force dependencies to be downloaded from the internet") do |use_cache|
+    options[:force_download] = true 
   end
 end.parse!
 

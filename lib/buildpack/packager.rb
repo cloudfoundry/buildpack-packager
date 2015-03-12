@@ -73,7 +73,7 @@ module Buildpack
         manifest[:dependencies].each do |dependency|
           translated_filename = dependency['uri'].gsub(/[:\/]/, '_')
           cached_file = File.expand_path(File.join(cache_directory, translated_filename))
-          if !options[:cache] || !File.exist?(cached_file)
+          if options[:force_download] || !File.exist?(cached_file)
             download_file(dependency['uri'], cached_file)
           end
 
