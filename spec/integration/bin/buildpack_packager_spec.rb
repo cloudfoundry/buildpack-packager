@@ -135,6 +135,17 @@ MANIFEST
         expect(status).not_to be_success
       end
     end
+
+    context 'with an invalid mode parameter' do
+      let(:mode) { 'beast' }
+
+      it 'reports proper usage' do
+        stdout, _, status = run_packager_binary
+
+        expect(stdout).to include("Usage:\n  buildpack-packager cached|uncached")
+        expect(status).not_to be_success
+      end
+    end
   end
 
   context 'with a manifest' do

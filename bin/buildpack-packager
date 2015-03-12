@@ -3,9 +3,11 @@ require 'buildpack/packager'
 require 'optparse'
 require 'buildpack/manifest_validator'
 
-usage_msg = "Usage:\n  #{File.basename(__FILE__)} cached|uncached --force-download"
+supported_modes = %w{cached uncached}
 
-unless ARGV.length > 0
+usage_msg = "Usage:\n  #{File.basename(__FILE__)} #{supported_modes.join('|')} --force-download"
+
+if !supported_modes.include?(ARGV[0])
   STDOUT.puts usage_msg
   exit 1
 end
