@@ -9,27 +9,35 @@ module Buildpack
     let(:file_location) { '/etc/hosts' }
     let(:md5) { Digest::MD5.file(file_location).hexdigest }
 
-    let(:buildpack) {
+    let(:options) {
       {
         root_dir: buildpack_dir,
         mode: buildpack_mode,
+        cache_dir: cache_dir,
+        manifest_path: manifest_path
+      }
+    }
+
+    let(:manifest_path) { File.join(buildpack_dir, 'manifest.yml') }
+    let(:manifest) {
+      {
+        exclude_files: files_to_exclude,
         language: 'sample',
         dependencies: [{
           'version' => '1.0',
           'name' => 'etc_host',
           'md5' => md5,
           'uri' => "file://#{file_location}"
-        }],
-        exclude_files: files_to_exclude,
-        cache_dir: cache_dir
+        }]
       }
     }
+
     let(:files_to_include) {
       [
         'VERSION',
         'README.md',
         'lib/sai.to',
-        'lib/rash'
+        'lib/rash',
       ]
     }
 
@@ -42,11 +50,17 @@ module Buildpack
     let(:files) { files_to_include + files_to_exclude }
     let(:cached_file) { File.join(cache_dir, 'file____etc_hosts') }
 
+    def create_manifest(manifest)
+      File.open(manifest_path, 'w') { |f| f.write manifest.to_yaml }
+    end
+
     before do
       make_fake_files(
         buildpack_dir,
         files
       )
+      files_to_include << 'manifest.yml'
+      create_manifest(manifest)
       `echo "1.2.3" > #{File.join(buildpack_dir, 'VERSION')}`
     end
 
@@ -59,7 +73,7 @@ module Buildpack
         let(:buildpack_mode) { :online }
 
         specify do
-          Packager.package(buildpack)
+          Packager.package(options)
 
           expect(all_files(buildpack_dir)).to include('sample_buildpack-v1.2.3.zip')
         end
@@ -69,7 +83,7 @@ module Buildpack
         let(:buildpack_mode) { :offline }
 
         specify do
-          Packager.package(buildpack)
+          Packager.package(options)
 
           expect(all_files(buildpack_dir)).to include('sample_buildpack-offline-v1.2.3.zip')
         end
@@ -82,7 +96,7 @@ module Buildpack
         let(:buildpack_mode) { :online }
 
         specify do
-          Packager.package(buildpack)
+          Packager.package(options)
 
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
@@ -95,7 +109,7 @@ module Buildpack
         let(:buildpack_mode) { :offline }
 
         specify do
-          Packager.package(buildpack)
+          Packager.package(options)
 
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-offline-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
@@ -110,7 +124,7 @@ module Buildpack
       let(:buildpack_mode) { :online }
 
       specify do
-        Packager.package(buildpack)
+        Packager.package(options)
 
         zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
         zip_contents = get_zip_contents(zip_file_path)
@@ -120,8 +134,9 @@ module Buildpack
 
       context 'when appending an exclusion for the zip file' do
         specify do
-          Packager.package(buildpack)
-          Packager.package(buildpack.merge(exclude_files: files_to_exclude + ['VERSION']))
+          Packager.package(options)
+          create_manifest(manifest.merge(exclude_files: files_to_exclude + ['VERSION']))
+          Packager.package(options)
 
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
@@ -136,7 +151,7 @@ module Buildpack
         let(:buildpack_mode) { :online }
 
         specify do
-          Packager.package(buildpack)
+          Packager.package(options)
 
           expect(File).to_not exist(cached_file)
         end
@@ -148,7 +163,7 @@ module Buildpack
 
         context 'by default' do
           specify do
-            Packager.package(buildpack)
+            Packager.package(options)
             expect(File).to exist(cached_file)
           end
         end
@@ -156,7 +171,7 @@ module Buildpack
         context 'with the cache option enabled' do
           context 'cached file does not exist' do
             specify do
-              Packager.package(buildpack.merge(cache: true))
+              Packager.package(options.merge(cache: true))
               expect(File).to exist(cached_file)
             end
           end
@@ -165,9 +180,9 @@ module Buildpack
             let(:cached_file) { File.join(cache_dir, "file____temp_file") }
 
             it 'uses the cached file instead of downloading it again' do
-              Packager.package(buildpack.merge(cache: true))
+              Packager.package(options.merge(cache: true))
               File.write(cached_file, 'a')
-              Packager.package(buildpack.merge(cache: true))
+              Packager.package(options.merge(cache: true))
               expect(File.read(cached_file)).to eq 'a'
             end
           end
@@ -180,7 +195,7 @@ module Buildpack
 
       context 'zip is installed' do
         specify do
-          expect { Packager.package(buildpack) }.not_to raise_error
+          expect { Packager.package(options) }.not_to raise_error
         end
       end
 
@@ -192,7 +207,7 @@ module Buildpack
         end
 
         specify do
-          expect { Packager.package(buildpack) }.to raise_error(RuntimeError)
+          expect { Packager.package(options) }.to raise_error(RuntimeError)
         end
       end
     end
@@ -202,7 +217,7 @@ module Buildpack
         let(:buildpack_mode) { :offline }
 
         specify 'user does not see dependencies directory in their buildpack folder' do
-          Packager.package(buildpack)
+          Packager.package(options)
 
           expect(all_files(buildpack_dir)).not_to include("dependencies")
         end

@@ -1,20 +1,9 @@
 #!/usr/bin/env ruby
-require 'yaml'
-require 'active_support/core_ext/hash/indifferent_access'
 require 'buildpack/packager'
 require 'optparse'
 require 'buildpack/manifest_validator'
 
-options = {}
 usage_msg = "Usage:\n  #{File.basename(__FILE__)} online|offline"
-
-OptionParser.new do |opts|
-  opts.banner = usage_msg
-
-  opts.on("--use-cache", "Cache depepndencies locally") do |use_cache|
-    options[:cache] = use_cache
-  end
-end.parse!
 
 unless ARGV.length > 0
   STDOUT.puts usage_msg
@@ -27,18 +16,23 @@ unless File.exist?('manifest.yml')
 end
 
 validator = Buildpack::ManifestValidator.new('manifest.yml')
-unless validator.valid? #!errors.values.all? { |value| value.empty? }
+unless validator.valid?
   STDERR.puts validator.errors
   exit 1
 end
 
-manifest = YAML.load_file('manifest.yml').with_indifferent_access
+options = {
+  root_dir: `pwd`.chomp,
+  manifest_path: 'manifest.yml',
+  mode: ARGV[0].to_sym
+}
 
-manifest.merge!({
-                    root_dir: `pwd`.chomp,
-                    mode: ARGV[0].to_sym,
-                })
+OptionParser.new do |opts|
+  opts.banner = usage_msg
 
-manifest.merge! options
+  opts.on("--use-cache", "Cache depepndencies locally") do |use_cache|
+    options[:cache] = use_cache
+  end
+end.parse!
 
-Buildpack::Packager.package(manifest)
+Buildpack::Packager.package(options)

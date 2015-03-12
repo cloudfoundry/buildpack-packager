@@ -1,26 +1,28 @@
 require 'buildpack/packager/version'
+require 'active_support/core_ext/hash/indifferent_access'
 require 'open3'
 require 'fileutils'
 require 'tmpdir'
+require 'yaml'
 
 module Buildpack
   module Packager
     class CheckSumError < StandardError; end
 
-    def self.package(buildpack)
-      package = Package.new(buildpack)
+    def self.package(options)
+      package = Package.new(options)
       package.execute!
       package
     end
 
-    class Package < Struct.new(:buildpack)
+    class Package < Struct.new(:options)
       def execute!
         check_for_zip
 
         Dir.mktmpdir do |temp_dir|
           copy_buildpack_to_temp_dir(temp_dir)
 
-          if buildpack[:mode] == :offline
+          if options[:mode] == :offline
             build_dependencies(temp_dir)
             validate_checksums_of_dependencies(temp_dir)
           end
@@ -30,44 +32,48 @@ module Buildpack
       end
 
       private
+      def manifest
+        @manifest ||= YAML.load_file(options[:manifest_path]).with_indifferent_access
+      end
+
       def zip_file_path
-        File.join(buildpack[:root_dir], zip_file_name)
+        File.join(options[:root_dir], zip_file_name)
       end
 
       def zip_file_name
-        "#{buildpack[:language]}_buildpack#{offline_identifier}-v#{buildpack_version}.zip"
+        "#{manifest[:language]}_buildpack#{offline_identifier}-v#{buildpack_version}.zip"
       end
 
       def buildpack_version
-        File.read("#{buildpack[:root_dir]}/VERSION").chomp
+        File.read("#{options[:root_dir]}/VERSION").chomp
       end
 
       def offline_identifier
-        return '' unless buildpack[:mode] == :offline
+        return '' unless options[:mode] == :offline
         '-offline'
       end
 
       def copy_buildpack_to_temp_dir(temp_dir)
-        FileUtils.cp_r(File.join(buildpack[:root_dir], '.'), temp_dir)
+        FileUtils.cp_r(File.join(options[:root_dir], '.'), temp_dir)
       end
 
       def build_zip_file(zip_file_path, temp_dir)
-        exclude_files = buildpack[:exclude_files].collect { |e| "--exclude=*#{e}*" }.join(" ")
+        exclude_files = manifest[:exclude_files].collect { |e| "--exclude=*#{e}*" }.join(" ")
         `rm -rf #{zip_file_path}`
         `cd #{temp_dir} && zip -r #{zip_file_path} ./ #{exclude_files}`
       end
 
       def build_dependencies(temp_dir)
-        cache_directory = buildpack[:cache_dir] || "#{ENV['HOME']}/.buildpack-packager/cache"
+        cache_directory = options[:cache_dir] || "#{ENV['HOME']}/.buildpack-packager/cache"
         FileUtils.mkdir_p(cache_directory)
 
         dependency_dir = File.join(temp_dir, "dependencies")
         FileUtils.mkdir_p(dependency_dir)
 
-        buildpack[:dependencies].each do |dependency|
+        manifest[:dependencies].each do |dependency|
           translated_filename = dependency['uri'].gsub(/[:\/]/, '_')
           cached_file = File.expand_path(File.join(cache_directory, translated_filename))
-          if !buildpack[:cache] || !File.exist?(cached_file)
+          if !options[:cache] || !File.exist?(cached_file)
             download_file(dependency['uri'], cached_file)
           end
 
@@ -77,7 +83,7 @@ module Buildpack
 
       def validate_checksums_of_dependencies(temp_dir)
         dependency_dir = File.join(temp_dir, "dependencies")
-        buildpack[:dependencies].each do |dependency|
+        manifest[:dependencies].each do |dependency|
           name = dependency['name']
           version = dependency['version']
           md5 = dependency['md5']
