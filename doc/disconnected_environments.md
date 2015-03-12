@@ -24,14 +24,14 @@ The specific mechanism varies between platforms. See your buildpack's documentat
 1. Build the buildpack
 
   ```shell
-  BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager [ online | offline ]
+  BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager [ uncached | cached ]
   ```
   
   This produces a buildpack for use on Cloud Foundry.
   
-  'offline' generates a zip with all the dependencies cached.
+  'cached' generates a zip with all the dependencies cached.
   
-  'online' does not include the dependencies, however it excludes some files as specified 
+  'uncached' does not include the dependencies, however it excludes some files as specified 
   in manifest.yml. 
 
 1. Use in Cloud Foundry
@@ -45,6 +45,6 @@ The specific mechanism varies between platforms. See your buildpack's documentat
   Upload the buildpack to your Cloud Foundry and specify it by name:
 
   ```shell
-  cf create-buildpack custom_ruby_buildpack ruby_buildpack-offline-custom.zip 1
+  cf create-buildpack custom_ruby_buildpack ruby_buildpack-cached-custom.zip 1
   ```
 

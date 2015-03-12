@@ -69,8 +69,8 @@ module Buildpack
     end
 
     describe 'a well formed zip file name' do
-      context 'an online buildpack' do
-        let(:buildpack_mode) { :online }
+      context 'an uncached buildpack' do
+        let(:buildpack_mode) { :uncached }
 
         specify do
           Packager.package(options)
@@ -79,21 +79,21 @@ module Buildpack
         end
       end
 
-      context 'an offline buildpack' do
-        let(:buildpack_mode) { :offline }
+      context 'an cached buildpack' do
+        let(:buildpack_mode) { :cached }
 
         specify do
           Packager.package(options)
 
-          expect(all_files(buildpack_dir)).to include('sample_buildpack-offline-v1.2.3.zip')
+          expect(all_files(buildpack_dir)).to include('sample_buildpack-cached-v1.2.3.zip')
         end
 
       end
     end
 
     describe 'the zip file contents' do
-      context 'an online buildpack' do
-        let(:buildpack_mode) { :online }
+      context 'an uncached buildpack' do
+        let(:buildpack_mode) { :uncached }
 
         specify do
           Packager.package(options)
@@ -105,13 +105,13 @@ module Buildpack
         end
       end
 
-      context 'an offline buildpack' do
-        let(:buildpack_mode) { :offline }
+      context 'an cached buildpack' do
+        let(:buildpack_mode) { :cached }
 
         specify do
           Packager.package(options)
 
-          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-offline-v1.2.3.zip')
+          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-cached-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
           dependencies = ["dependencies/file____etc_hosts"]
 
@@ -121,7 +121,7 @@ module Buildpack
     end
 
     describe 'excluded files' do
-      let(:buildpack_mode) { :online }
+      let(:buildpack_mode) { :uncached }
 
       specify do
         Packager.package(options)
@@ -147,8 +147,8 @@ module Buildpack
     end
 
     describe 'caching of dependencies' do
-      context 'an online buildpack' do
-        let(:buildpack_mode) { :online }
+      context 'an uncached buildpack' do
+        let(:buildpack_mode) { :uncached }
 
         specify do
           Packager.package(options)
@@ -157,8 +157,8 @@ module Buildpack
         end
       end
 
-      context 'an offline buildpack' do
-        let(:buildpack_mode) { :offline }
+      context 'an cached buildpack' do
+        let(:buildpack_mode) { :cached }
         let(:cached_file) { File.join(cache_dir, "file____etc_hosts") }
 
         context 'by default' do
@@ -211,8 +211,8 @@ module Buildpack
       context 'with an invalid MD5' do
         let(:md5) { 'wompwomp' }
 
-        context 'in offline mode' do
-          let(:buildpack_mode) { :offline }
+        context 'in cached mode' do
+          let(:buildpack_mode) { :cached }
 
           it 'raises an error' do
             expect do
@@ -221,8 +221,8 @@ module Buildpack
           end
         end
 
-        context 'in online mode' do
-          let(:buildpack_mode) { :online }
+        context 'in uncached mode' do
+          let(:buildpack_mode) { :uncached }
 
           it 'does not raise an error' do
             expect do
@@ -234,7 +234,7 @@ module Buildpack
     end
 
     describe 'existence of zip' do
-      let(:buildpack_mode) { :online }
+      let(:buildpack_mode) { :uncached }
 
       context 'zip is installed' do
         specify do
@@ -256,8 +256,8 @@ module Buildpack
     end
 
     describe 'avoid changing state of buildpack folder, other than creating the artifact (.zip)' do
-      context 'create an offline buildpack' do
-        let(:buildpack_mode) { :offline }
+      context 'create an cached buildpack' do
+        let(:buildpack_mode) { :cached }
 
         specify 'user does not see dependencies directory in their buildpack folder' do
           Packager.package(options)

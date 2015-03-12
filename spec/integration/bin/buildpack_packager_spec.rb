@@ -101,7 +101,7 @@ MANIFEST
   end
 
   context 'without a manifest' do
-    let(:mode) { 'online' }
+    let(:mode) { 'uncached' }
 
     specify do
       _, stderr, status = run_packager_binary
@@ -112,7 +112,7 @@ MANIFEST
   end
 
   context 'with an invalid manifest' do
-    let(:mode) { 'online' }
+    let(:mode) { 'uncached' }
 
     before do
       create_invalid_manifest
@@ -131,7 +131,7 @@ MANIFEST
       specify do
         stdout, _, status = run_packager_binary
 
-        expect(stdout).to include("Usage:\n  buildpack-packager online|offline")
+        expect(stdout).to include("Usage:\n  buildpack-packager cached|uncached")
         expect(status).not_to be_success
       end
     end
@@ -144,8 +144,8 @@ MANIFEST
 
     describe 'the zip file contents' do
 
-      context 'an online buildpack' do
-        let(:mode) { 'online' }
+      context 'an uncached buildpack' do
+        let(:mode) { 'uncached' }
 
         specify do
           stdout, stderr, status = run_packager_binary
@@ -158,13 +158,13 @@ MANIFEST
         end
       end
 
-      context 'an offline buildpack' do
-        let(:mode) { 'offline' }
+      context 'an cached buildpack' do
+        let(:mode) { 'cached' }
 
         specify do
           stdout, stderr, status = run_packager_binary
 
-          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-offline-v1.2.3.zip')
+          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-cached-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
 
           dependencies_with_translation = dependencies.

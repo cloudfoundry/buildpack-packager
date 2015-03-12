@@ -6,13 +6,13 @@ Usage
 =====
 
 1. Create a `manifest.yml` in your buildpack
-1. Run the packager for online or offline mode
-`buildpack-packager [offline|online]`
+1. Run the packager for uncached or cached mode
+`buildpack-packager [cached|uncached]`
 
 In either mode, the packager will add (almost) everything in your buildpack directory into a zip file.
 It will exclude anything marked for exclusion in your manifest.
 
-In offline mode, the packager will download and add dependencies as described in the manifest.
+In cached mode, the packager will download and add dependencies as described in the manifest.
 
 Manifest
 ========
@@ -70,11 +70,11 @@ The dependencies key specifies the name, version, uri, md5, and the cf_stacks (t
 All keys are required:
 
 - `name`, `version`, and `uri`: Required for `url_to_dependency_map` to work. Make sure to create a new entry in the `url_to_dependency_map` if a matching regex does not exist for the dependency to be curled.
-- `md5`: Required to ensure that dependencies being packaged for 'offline' mode have not been compromised
+- `md5`: Required to ensure that dependencies being packaged for 'cached' mode have not been compromised
 - `cf_stacks`: Required to ensure the right binary is selected for the root file system in which an app will be running on.  Currently supported root file systems are lucid64(default) and cflinuxfs2. *Note that if the same dependency is
 used for both root file systems, both can be listed under the `cf_stacks` key.*
 
-To have your buildpack use these 'cached' dependencies, use `compile_extensions/bin/translate_dependency_url` to translate the url into a locally cached url (useful for offline mode).
+To have your buildpack use these 'cached' dependencies, use `compile_extensions/bin/translate_dependency_url` to translate the url into a locally cached url (useful for cached mode).
 Read more on the [compile-extensions repo](https://github.com/cf-buildpacks/compile-extensions/).
 
 exclude_files (required)

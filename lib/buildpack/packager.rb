@@ -22,7 +22,7 @@ module Buildpack
         Dir.mktmpdir do |temp_dir|
           copy_buildpack_to_temp_dir(temp_dir)
 
-          if options[:mode] == :offline
+          if options[:mode] == :cached
             build_dependencies(temp_dir)
             validate_checksums_of_dependencies(temp_dir)
           end
@@ -41,16 +41,16 @@ module Buildpack
       end
 
       def zip_file_name
-        "#{manifest[:language]}_buildpack#{offline_identifier}-v#{buildpack_version}.zip"
+        "#{manifest[:language]}_buildpack#{cached_identifier}-v#{buildpack_version}.zip"
       end
 
       def buildpack_version
         File.read("#{options[:root_dir]}/VERSION").chomp
       end
 
-      def offline_identifier
-        return '' unless options[:mode] == :offline
-        '-offline'
+      def cached_identifier
+        return '' unless options[:mode] == :cached
+        '-cached'
       end
 
       def copy_buildpack_to_temp_dir(temp_dir)
