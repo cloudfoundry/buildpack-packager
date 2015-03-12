@@ -207,6 +207,32 @@ module Buildpack
       end
     end
 
+    describe 'when checking checksums' do
+      context 'with an invalid MD5' do
+        let(:md5) { 'wompwomp' }
+
+        context 'in offline mode' do
+          let(:buildpack_mode) { :offline }
+
+          it 'raises an error' do
+            expect do
+              Packager.package(options)
+            end.to raise_error(Packager::CheckSumError)
+          end
+        end
+
+        context 'in online mode' do
+          let(:buildpack_mode) { :online }
+
+          it 'does not raise an error' do
+            expect do
+              Packager.package(options)
+            end.to_not raise_error
+          end
+        end
+      end
+    end
+
     describe 'existence of zip' do
       let(:buildpack_mode) { :online }
 
