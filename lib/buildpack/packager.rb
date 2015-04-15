@@ -4,6 +4,7 @@ require 'open3'
 require 'fileutils'
 require 'tmpdir'
 require 'yaml'
+require 'shellwords'
 
 module Buildpack
   module Packager
@@ -37,7 +38,7 @@ module Buildpack
       end
 
       def zip_file_path
-        File.join(options[:root_dir], zip_file_name)
+        Shellwords.escape(File.join(options[:root_dir], zip_file_name))
       end
 
       def zip_file_name
