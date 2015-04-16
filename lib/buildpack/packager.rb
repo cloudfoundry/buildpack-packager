@@ -100,7 +100,7 @@ module Buildpack
 
           if md5 != Digest::MD5.file(dependency).hexdigest
             raise CheckSumError,
-              "File: #{name}, version: #{version} downloaded at location #{uri}\n\tis reporting a different checksum than the one specified in the manifest."
+            "File: #{name}, version: #{version} (#{translated_filename}) downloaded at location #{uri} is reporting a different checksum than the one specified in the manifest."
           end
         end
       end
