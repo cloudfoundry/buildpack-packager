@@ -33,6 +33,11 @@ module Buildpack
       end
 
       private
+
+      def uri_cache_path uri
+        uri.gsub(/[:\/]/, '_')
+      end
+
       def manifest
         @manifest ||= YAML.load_file(options[:manifest_path]).with_indifferent_access
       end
@@ -72,7 +77,7 @@ module Buildpack
         FileUtils.mkdir_p(dependency_dir)
 
         manifest[:dependencies].each do |dependency|
-          translated_filename = dependency['uri'].gsub(/[:\/]/, '_')
+          translated_filename = uri_cache_path dependency['uri']
           cached_file = File.expand_path(File.join(cache_directory, translated_filename))
           if options[:force_download] || !File.exist?(cached_file)
             download_file(dependency['uri'], cached_file)
@@ -90,7 +95,7 @@ module Buildpack
           md5 = dependency['md5']
           uri = dependency['uri']
 
-          translated_filename = uri.gsub(/[:\/]/, '_')
+          translated_filename = uri_cache_path uri
           dependency = File.expand_path(File.join(dependency_dir, translated_filename))
 
           if md5 != Digest::MD5.file(dependency).hexdigest
