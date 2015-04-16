@@ -197,10 +197,9 @@ module Buildpack
           context 'on subsequent calls' do
             it 'does use the cached file' do
               Packager.package(options.merge(force_download: false))
-              File.write(cached_file, 'asdf')
-              expect do
-                Packager.package(options.merge(force_download: false))
-              end.to raise_error(Packager::CheckSumError)
+
+              expect_any_instance_of(Packager::Package).not_to receive(:download_file)
+              Packager.package(options.merge(force_download: false))
             end
           end
         end

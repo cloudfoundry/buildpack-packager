@@ -25,7 +25,6 @@ module Buildpack
 
           if options[:mode] == :cached
             build_dependencies(temp_dir)
-            validate_checksums_of_dependencies(temp_dir)
           end
 
           build_zip_file(zip_file_path, temp_dir)
@@ -79,28 +78,37 @@ module Buildpack
         manifest[:dependencies].each do |dependency|
           translated_filename = uri_cache_path dependency['uri']
           cached_file = File.expand_path(File.join(cache_directory, translated_filename))
+
+          from_cache = true
           if options[:force_download] || !File.exist?(cached_file)
             download_file(dependency['uri'], cached_file)
+            from_cache = false
           end
+
+          ensure_correct_dependency_checksum({
+            cached_file: cached_file,
+            dependency: dependency,
+            from_cache: from_cache
+          })
 
           FileUtils.cp(cached_file, dependency_dir)
         end
       end
 
-      def validate_checksums_of_dependencies(temp_dir)
-        dependency_dir = File.join(temp_dir, "dependencies")
-        manifest[:dependencies].each do |dependency|
-          name = dependency['name']
-          version = dependency['version']
-          md5 = dependency['md5']
-          uri = dependency['uri']
+      def ensure_correct_dependency_checksum(cached_file:, dependency:, from_cache:)
+        if dependency['md5'] != Digest::MD5.file(cached_file).hexdigest
+          if from_cache
+            FileUtils.rm_rf(cached_file)
 
-          translated_filename = uri_cache_path uri
-          dependency = File.expand_path(File.join(dependency_dir, translated_filename))
-
-          if md5 != Digest::MD5.file(dependency).hexdigest
+            download_file(dependency['uri'], cached_file)
+            ensure_correct_dependency_checksum({
+              cached_file: cached_file,
+              dependency: dependency,
+              from_cache: false
+            })
+          else
             raise CheckSumError,
-            "File: #{name}, version: #{version} (#{translated_filename}) downloaded at location #{uri} is reporting a different checksum than the one specified in the manifest."
+              "File: #{dependency['name']}, version: #{dependency['version']} downloaded at location #{dependency['uri']}\n\tis reporting a different checksum than the one specified in the manifest."
           end
         end
       end
