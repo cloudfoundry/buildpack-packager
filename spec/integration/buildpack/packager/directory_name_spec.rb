@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'buildpack/packager'
 
-describe Buildpack::Packager::Package do
+describe 'naming directories' do
 
   let(:fake_file_uri) do
     location = File.join(Dir.mktmpdir, 'fake.file')
@@ -75,33 +75,6 @@ describe Buildpack::Packager::Package do
       it "it puts the zip file in the right place" do
         package.execute!
         expect(File.exists?(File.join(root_dir, 'fake_buildpack-v1.0.0.zip'))).to be(true)
-      end
-    end
-
-    context 'cached mode' do
-      let(:mode) { :cached }
-
-      context 'cache has same file but with different MD5' do
-        let(:fake_file) { fake_file_uri.gsub(/[\/:]/, '_') }
-        let(:cache_dir) do
-          cache_dir = Dir.mktmpdir('cache')
-          File.write(File.join(cache_dir, fake_file), 'not the right stuff')
-          cache_dir
-        end
-
-        it 'redownloads the file' do
-          package.execute!
-          expect(Digest::MD5.file(File.join(cache_dir, fake_file)).hexdigest).to eq(md5)
-        end
-      end
-
-      context 'cache does not have file but with different MD5' do
-        let(:cache_dir) { Dir.mktmpdir('cache') }
-        let(:md5) { 'fake-md5' }
-
-        it 'throws an error' do
-          expect { package.execute! }.to raise_error(Buildpack::Packager::CheckSumError)
-        end
       end
     end
   end
