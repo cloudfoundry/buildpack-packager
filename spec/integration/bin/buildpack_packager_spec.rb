@@ -4,11 +4,6 @@ require 'yaml'
 require 'open3'
 
 describe 'buildpack_packager binary' do
-  def run_packager_binary
-    packager_binary_file = "#{`pwd`.chomp}/bin/buildpack-packager"
-    Open3.capture3("cd #{buildpack_dir} && #{packager_binary_file} #{mode}")
-  end
-
   def create_manifest
     File.open(File.join(buildpack_dir, 'manifest.yml'), 'w') do |manifest_file|
       manifest_file.write <<-MANIFEST
@@ -104,9 +99,9 @@ MANIFEST
     let(:mode) { 'uncached' }
 
     specify do
-      _, stderr, status = run_packager_binary
+      output, status = run_packager_binary(buildpack_dir, mode)
 
-      expect(stderr).to include('Could not find manifest.yml')
+      expect(output).to include('Could not find manifest.yml')
       expect(status).not_to be_success
     end
   end
@@ -119,8 +114,9 @@ MANIFEST
     end
 
     specify do
-      _, stderr, status = run_packager_binary
-      expect(stderr).to include('parser_error')
+      output, status = run_packager_binary(buildpack_dir, mode)
+
+      expect(output).to include('parser_error')
       expect(status).not_to be_success
     end
   end
@@ -129,9 +125,9 @@ MANIFEST
     context 'without a mode parameter' do
       let(:mode) { "" }
       specify do
-        stdout, _, status = run_packager_binary
+        output, status = run_packager_binary(buildpack_dir, mode)
 
-        expect(stdout).to include("Usage:\n  buildpack-packager cached|uncached")
+        expect(output).to include("Usage:\n  buildpack-packager cached|uncached")
         expect(status).not_to be_success
       end
     end
@@ -140,9 +136,9 @@ MANIFEST
       let(:mode) { 'beast' }
 
       it 'reports proper usage' do
-        stdout, _, status = run_packager_binary
+        output, status = run_packager_binary(buildpack_dir, mode)
 
-        expect(stdout).to include("Usage:\n  buildpack-packager cached|uncached")
+        expect(output).to include("Usage:\n  buildpack-packager cached|uncached")
         expect(status).not_to be_success
       end
     end
@@ -159,7 +155,7 @@ MANIFEST
         let(:mode) { 'uncached' }
 
         specify do
-          stdout, stderr, status = run_packager_binary
+          output, status = run_packager_binary(buildpack_dir, mode)
 
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
@@ -173,7 +169,7 @@ MANIFEST
         let(:mode) { 'cached' }
 
         specify do
-          stdout, stderr, status = run_packager_binary
+          _, status = run_packager_binary(buildpack_dir, mode)
 
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-cached-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
@@ -193,7 +189,7 @@ MANIFEST
           let(:md5) { "InvalidMD5_123" }
 
           specify do
-            _, _, status = run_packager_binary
+            _, status = run_packager_binary(buildpack_dir, mode)
             expect(status).not_to be_success
           end
         end

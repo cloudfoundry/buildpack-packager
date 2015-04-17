@@ -1,4 +1,5 @@
 require 'kwalify'
+require 'kwalify/parser/yaml-patcher'
 require 'uri'
 
 module Buildpack

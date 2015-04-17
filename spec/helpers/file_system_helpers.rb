@@ -1,6 +1,11 @@
 require 'zip'
 
 module FileSystemHelpers
+  def run_packager_binary(buildpack_dir, mode)
+    packager_binary_file = "#{`pwd`.chomp}/bin/buildpack-packager"
+    Open3.capture2e("cd #{buildpack_dir} && #{packager_binary_file} #{mode}")
+  end
+
   def make_fake_files(root, file_list)
     file_list.each do |file|
       full_path = File.join(root, file)
@@ -21,5 +26,9 @@ module FileSystemHelpers
           map { |entry| entry.name }.
           select { |name| name[/\/$/].nil? }
     end
+  end
+
+  def get_md5_of_file(path)
+    Digest::MD5.file(path).hexdigest
   end
 end
