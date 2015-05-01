@@ -8,18 +8,49 @@ require 'shellwords'
 module Buildpack
   module Packager
     class Package < Struct.new(:options)
-      def execute!
-        check_for_zip
+      def copy_buildpack_to_temp_dir(temp_dir)
+        FileUtils.cp_r(File.join(options[:root_dir], '.'), temp_dir)
 
-        Dir.mktmpdir do |temp_dir|
-          copy_buildpack_to_temp_dir(temp_dir)
+        if options[:manifest_path] == '.full.manifest.yml'
+          FileUtils.rm(File.join(temp_dir, 'manifest.yml'))
+          FileUtils.mv(File.join(temp_dir, '.full.manifest.yml'), File.join(temp_dir, 'manifest.yml'))
+        end
+      end
 
-          if options[:mode] == :cached
-            build_dependencies(temp_dir)
+      def build_dependencies(temp_dir)
+        local_cache_directory = options[:cache_dir] || "#{ENV['HOME']}/.buildpack-packager/cache"
+        FileUtils.mkdir_p(local_cache_directory)
+
+        dependency_dir = File.join(temp_dir, "dependencies")
+        FileUtils.mkdir_p(dependency_dir)
+
+        download_dependencies(manifest[:dependencies], local_cache_directory, dependency_dir)
+      end
+
+      def download_dependencies(dependencies, local_cache_directory, dependency_dir)
+        dependencies.each do |dependency|
+          translated_filename = uri_cache_path dependency['uri']
+          local_cached_file = File.expand_path(File.join(local_cache_directory, translated_filename))
+
+          from_local_cache = true
+          if options[:force_download] || !File.exist?(local_cached_file)
+            download_file(dependency['uri'], local_cached_file)
+            from_local_cache = false
           end
 
-          build_zip_file(zip_file_path, temp_dir)
+          ensure_correct_dependency_checksum({
+            local_cached_file: local_cached_file,
+            dependency: dependency,
+            from_local_cache: from_local_cache
+          })
+
+          FileUtils.cp(local_cached_file, dependency_dir)
         end
+      end
+
+      def build_zip_file(temp_dir)
+        FileUtils.rm_rf(zip_file_path)
+        zip_files(temp_dir, zip_file_path, manifest[:exclude_files])
       end
 
       private
@@ -49,62 +80,16 @@ module Buildpack
         '-cached'
       end
 
-      def copy_buildpack_to_temp_dir(temp_dir)
-        FileUtils.cp_r(File.join(options[:root_dir], '.'), temp_dir)
+      def ensure_correct_dependency_checksum(local_cached_file:, dependency:, from_local_cache:)
+        if dependency['md5'] != Digest::MD5.file(local_cached_file).hexdigest
+          if from_local_cache
+            FileUtils.rm_rf(local_cached_file)
 
-        if options[:manifest_path] == '.full.manifest.yml'
-          FileUtils.rm(File.join(temp_dir, 'manifest.yml'))
-          FileUtils.mv(File.join(temp_dir, '.full.manifest.yml'), File.join(temp_dir, 'manifest.yml'))
-        end
-      end
-
-      def build_zip_file(zip_file_path, temp_dir)
-        exclude_files = manifest[:exclude_files].collect { |e| "--exclude=*#{e}*" }.join(" ")
-        `rm -rf #{zip_file_path}`
-        `cd #{temp_dir} && zip -r #{zip_file_path} ./ #{exclude_files}`
-      end
-
-      def build_dependencies(temp_dir)
-        cache_directory = options[:cache_dir] || "#{ENV['HOME']}/.buildpack-packager/cache"
-        FileUtils.mkdir_p(cache_directory)
-
-        dependency_dir = File.join(temp_dir, "dependencies")
-        FileUtils.mkdir_p(dependency_dir)
-
-        cache_dependencies(manifest[:dependencies], cache_directory, dependency_dir)
-      end
-
-      def cache_dependencies(dependencies, cache_directory, dependency_dir)
-        dependencies.each do |dependency|
-          translated_filename = uri_cache_path dependency['uri']
-          cached_file = File.expand_path(File.join(cache_directory, translated_filename))
-
-          from_cache = true
-          if options[:force_download] || !File.exist?(cached_file)
-            download_file(dependency['uri'], cached_file)
-            from_cache = false
-          end
-
-          ensure_correct_dependency_checksum({
-                                               cached_file: cached_file,
-                                               dependency: dependency,
-                                               from_cache: from_cache
-                                             })
-
-          FileUtils.cp(cached_file, dependency_dir)
-        end
-      end
-
-      def ensure_correct_dependency_checksum(cached_file:, dependency:, from_cache:)
-        if dependency['md5'] != Digest::MD5.file(cached_file).hexdigest
-          if from_cache
-            FileUtils.rm_rf(cached_file)
-
-            download_file(dependency['uri'], cached_file)
+            download_file(dependency['uri'], local_cached_file)
             ensure_correct_dependency_checksum({
-              cached_file: cached_file,
+              local_cached_file: local_cached_file,
               dependency: dependency,
-              from_cache: false
+              from_local_cache: false
             })
           else
             raise CheckSumError,
@@ -113,14 +98,13 @@ module Buildpack
         end
       end
 
-      def check_for_zip
-        _, _, status = Open3.capture3("which zip")
-
-        raise RuntimeError, "Zip is not installed\nTry: apt-get install zip\nAnd then rerun" if status.to_s.include?("exit 1")
-      end
-
       def download_file(url, file)
         `curl #{url} -o #{file} -L --fail -f`
+      end
+
+      def zip_files(source_dir, zip_file_path, excluded_files)
+        exclude_list = excluded_files.map { |file| "--exclude=*#{file}*" }.join(' ')
+        `cd #{source_dir} && zip -r #{zip_file_path} ./ #{exclude_list}`
       end
     end
   end
