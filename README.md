@@ -1,4 +1,5 @@
 BUILDPACK PACKAGER
+==================
 
 Simple tool to package a buildpack to upload to Cloud Foundry.
 
@@ -13,6 +14,15 @@ In either mode, the packager will add (almost) everything in your buildpack dire
 It will exclude anything marked for exclusion in your manifest.
 
 In cached mode, the packager will download and add dependencies as described in the manifest.
+
+###Option Flags
+####--force-download
+Running `buildpack-packager cached` with the the `--force-download` option will force the packager to download dependencies from the s3 host and ignore the local cache.
+
+####--use-full-manifest
+If the buildpack includes a `.full.manifest.yml` file containing a larger set of dependencies, passing the `--use-full-manifest` option when running `buildpack-packager [cached|uncached]` will use the full manifest instead of the default manifest.
+
+
 
 Manifest
 ========
