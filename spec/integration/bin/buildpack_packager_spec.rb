@@ -4,6 +4,11 @@ require 'yaml'
 require 'open3'
 
 describe 'buildpack_packager binary' do
+  def create_manifests
+    create_manifest
+    create_full_manifest
+  end
+
   def create_manifest
     File.open(File.join(buildpack_dir, 'manifest.yml'), 'w') do |manifest_file|
       manifest_file.write <<-MANIFEST
@@ -33,6 +38,42 @@ MANIFEST
     files_to_include << 'manifest.yml'
   end
 
+  def create_full_manifest
+    File.open(File.join(buildpack_dir, '.full.manifest.yml'), 'w') do |manifest_file|
+      manifest_file.write <<-MANIFEST
+---
+language: sample
+
+url_to_dependency_map:
+  - match: fake_name(\d+\.\d+(\.\d+)?)
+    name: fake_name
+    version: $1
+
+dependencies:
+  - name: fake_name
+    version: 1.2
+    uri: file://#{file_location}
+    md5: #{md5}
+    cf_stacks:
+      - lucid64
+      - cflinuxfs2
+  - name: fake_name
+    version: 1.1
+    uri: file://#{deprecated_file_location}
+    md5: #{deprecated_md5}
+    cf_stacks:
+      - lucid64
+      - cflinuxfs2
+
+exclude_files:
+  - .gitignore
+  - lib/ephemeral_junkpile
+MANIFEST
+    end
+
+    files_to_include << '.full.manifest.yml'
+  end
+
   def create_invalid_manifest
     File.open(File.join(buildpack_dir, 'manifest.yml'), 'w') do |manifest_file|
       manifest_file.write <<-MANIFEST
@@ -54,6 +95,8 @@ MANIFEST
   let(:remote_dependencies_dir) { File.join(tmp_dir, 'remote_dependencies') }
   let(:file_location) { "#{remote_dependencies_dir}/dep1.txt" }
   let(:md5) { Digest::MD5.file(file_location).hexdigest }
+  let(:deprecated_file_location) { "#{remote_dependencies_dir}/dep2.txt" }
+  let(:deprecated_md5) { Digest::MD5.file(deprecated_file_location).hexdigest }
 
   let(:files_to_include) {
     [
@@ -74,7 +117,7 @@ MANIFEST
   let(:files) { files_to_include + files_to_exclude }
 
   let(:dependencies) {
-    ['dep1.txt']
+    ['dep1.txt', 'dep2.txt']
   }
 
   before do
@@ -93,6 +136,33 @@ MANIFEST
 
   after do
     FileUtils.remove_entry tmp_dir
+  end
+
+  describe 'flags' do
+    describe '--use-full-manifest' do
+      let(:flags) { '--use-full-manifest' }
+      let(:mode) { 'uncached' }
+
+      before do
+        create_manifests
+      end
+
+      it 'uses the full manifest' do
+        run_packager_binary(buildpack_dir, mode, flags)
+
+        manifest_location = File.join(Dir.mktmpdir, 'manifest.yml')
+        zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
+
+        Zip::File.open(zip_file_path) do |zip_file|
+          generated_manifest = zip_file.find { |file| file.name == 'manifest.yml' }
+          generated_manifest.extract(manifest_location)
+        end
+
+        manifest_contents = File.read(manifest_location)
+
+        expect(manifest_contents).to eq(File.read(File.join(buildpack_dir, '.full.manifest.yml')))
+      end
+    end
   end
 
   context 'without a manifest' do
@@ -174,15 +244,16 @@ MANIFEST
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-cached-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
 
-          dependencies_with_translation = dependencies.
-            map { |dep| "file://#{remote_dependencies_dir}/#{dep}" }.
+          dependencies_in_manifest = YAML.load_file(File.join(buildpack_dir, 'manifest.yml'))['dependencies']
+
+          dependencies_with_translation = dependencies_in_manifest.
+            map { |dep| "file://#{remote_dependencies_dir}/#{dep['uri'].split('/').last}" }.
             map { |path| path.gsub(/[:\/]/, '_') }
 
             deps_with_path = dependencies_with_translation.map { |dep| "dependencies/#{dep}" }
 
             expect(zip_contents).to match_array(files_to_include + deps_with_path)
             expect(status).to be_success
-
         end
 
         context 'vendored dependencies with invalid checksums' do

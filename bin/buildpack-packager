@@ -12,17 +12,6 @@ if !supported_modes.include?(ARGV[0])
   exit 1
 end
 
-unless File.exist?('manifest.yml')
-  STDERR.puts 'Could not find manifest.yml'
-  exit 1
-end
-
-validator = Buildpack::ManifestValidator.new('manifest.yml')
-unless validator.valid?
-  STDERR.puts validator.errors
-  exit 1
-end
-
 options = {
   root_dir: `pwd`.chomp,
   manifest_path: 'manifest.yml',
@@ -36,6 +25,22 @@ OptionParser.new do |opts|
   opts.on("--force-download", "Force dependencies to be downloaded from the internet") do
     options[:force_download] = true 
   end
+
+  opts.on("--use-full-manifest", "Use manifest containing full set of dependencies") do
+    options[:manifest_path] = '.full.manifest.yml'
+  end
 end.parse!
+
+manifest_path = options[:manifest_path]
+unless File.exist?(manifest_path)
+  STDERR.puts "Could not find #{manifest_path}"
+  exit 1
+end
+
+validator = Buildpack::ManifestValidator.new(manifest_path)
+unless validator.valid?
+  STDERR.puts validator.errors
+  exit 1
+end
 
 Buildpack::Packager.package(options)

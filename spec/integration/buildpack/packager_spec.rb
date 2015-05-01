@@ -6,7 +6,13 @@ module Buildpack
     let(:tmp_dir) { Dir.mktmpdir }
     let(:buildpack_dir) { File.join(tmp_dir, 'sample-buildpack-root-dir') }
     let(:cache_dir) { File.join(tmp_dir, 'cache-dir') }
-    let(:file_location) { '/etc/hosts' }
+    let(:file_location) do
+      location = File.join(tmp_dir, 'sample_host')
+      File.write(location, 'contents!')
+      location
+    end
+    let(:translated_file_location) { 'file___' + file_location.gsub(/[:\/]/, '_') }
+
     let(:md5) { Digest::MD5.file(file_location).hexdigest }
 
     let(:options) {
@@ -23,6 +29,11 @@ module Buildpack
       {
         exclude_files: files_to_exclude,
         language: 'sample',
+        url_to_dependency_map: [{
+          match: "ruby-(\d+\.\d+\.\d+)",
+          name: "ruby",
+          version: "$1",
+        }],
         dependencies: [{
           'version' => '1.0',
           'name' => 'etc_host',
@@ -48,7 +59,7 @@ module Buildpack
     }
 
     let(:files) { files_to_include + files_to_exclude }
-    let(:cached_file) { File.join(cache_dir, 'file____etc_hosts') }
+    let(:cached_file) { File.join(cache_dir, translated_file_location) }
 
     def create_manifest(manifest)
       File.open(manifest_path, 'w') { |f| f.write manifest.to_yaml }
@@ -105,15 +116,16 @@ module Buildpack
         end
       end
 
-      context 'an cached buildpack' do
+      context 'a cached buildpack' do
         let(:buildpack_mode) { :cached }
 
         specify do
           Packager.package(options)
 
+
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-cached-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
-          dependencies = ["dependencies/file____etc_hosts"]
+          dependencies = ["dependencies/#{translated_file_location}"]
 
           expect(zip_contents).to match_array(files_to_include + dependencies)
         end
@@ -157,9 +169,8 @@ module Buildpack
         end
       end
 
-      context 'an cached buildpack' do
+      context 'a cached buildpack' do
         let(:buildpack_mode) { :cached }
-        let(:cached_file) { File.join(cache_dir, "file____etc_hosts") }
 
         context 'by default' do
           specify do

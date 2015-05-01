@@ -1,9 +1,9 @@
 require 'zip'
 
 module FileSystemHelpers
-  def run_packager_binary(buildpack_dir, mode)
-    packager_binary_file = "#{`pwd`.chomp}/bin/buildpack-packager"
-    Open3.capture2e("cd #{buildpack_dir} && #{packager_binary_file} #{mode}")
+  def run_packager_binary(buildpack_dir, mode, flags = '')
+    packager_binary_file = File.join(`pwd`.chomp, "bin", "buildpack-packager")
+    Open3.capture2e("cd #{buildpack_dir} && #{packager_binary_file} #{mode} #{flags}")
   end
 
   def make_fake_files(root, file_list)
