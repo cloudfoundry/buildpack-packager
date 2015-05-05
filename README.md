@@ -17,11 +17,10 @@ In cached mode, the packager will download and add dependencies as described in 
 
 ###Option Flags
 ####--force-download
-Running `buildpack-packager cached` with the the `--force-download` option will force the packager to download dependencies from the s3 host and ignore the local cache.
+By default, `buildpack-packager` stores the dependencies that it downloads while building a cached buildpack in a local cache at `~/.buildpack-packager`. This is in order to avoid redownloading them when repackaging similar buildpacks. Running `buildpack-packager cached` with the the `--force-download` option will force the packager to download dependencies from the s3 host and ignore the local cache.
 
-####--use-full-manifest
-If the buildpack includes a `.full.manifest.yml` file containing a larger set of dependencies, passing the `--use-full-manifest` option when running `buildpack-packager [cached|uncached]` will use the full manifest instead of the default manifest.
-
+####--use-custom-manifest
+If you would like to include a different manifest file in your packaged buildpack, you may call `buildpack-packager` with the the `--use-custom-manifest [path/to/manifest.yml]` option. `buildpack-packager` will generate a buildpack with the specified manifest. If you are building a cached buildpack, `buildpack-packager` will vendor dependencies from the specified manifest as well.
 
 
 Manifest
