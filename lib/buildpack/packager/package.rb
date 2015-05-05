@@ -11,9 +11,8 @@ module Buildpack
       def copy_buildpack_to_temp_dir(temp_dir)
         FileUtils.cp_r(File.join(options[:root_dir], '.'), temp_dir)
 
-        if options[:manifest_path] == '.full.manifest.yml'
-          FileUtils.rm(File.join(temp_dir, 'manifest.yml'))
-          FileUtils.mv(File.join(temp_dir, '.full.manifest.yml'), File.join(temp_dir, 'manifest.yml'))
+        unless options[:manifest_path] == 'manifest.yml'
+          FileUtils.mv(File.join(temp_dir, options[:manifest_path]), File.join(temp_dir, 'manifest.yml'))
         end
       end
 
@@ -29,7 +28,7 @@ module Buildpack
 
       def download_dependencies(dependencies, local_cache_directory, dependency_dir)
         dependencies.each do |dependency|
-          translated_filename = uri_cache_path dependency['uri']
+          translated_filename = uri_cache_path(dependency['uri'])
           local_cached_file = File.expand_path(File.join(local_cache_directory, translated_filename))
 
           from_local_cache = true
@@ -60,7 +59,8 @@ module Buildpack
       end
 
       def manifest
-        @manifest ||= YAML.load_file(options[:manifest_path]).with_indifferent_access
+        absolute_manifest_path = File.join(options[:root_dir], options[:manifest_path])
+        @manifest ||= YAML.load_file(absolute_manifest_path).with_indifferent_access
       end
 
       def zip_file_path

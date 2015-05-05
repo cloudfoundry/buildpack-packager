@@ -39,7 +39,7 @@ MANIFEST
   end
 
   def create_full_manifest
-    File.open(File.join(buildpack_dir, '.full.manifest.yml'), 'w') do |manifest_file|
+    File.open(File.join(buildpack_dir, 'manifest-including-unsupported.yml'), 'w') do |manifest_file|
       manifest_file.write <<-MANIFEST
 ---
 language: sample
@@ -71,7 +71,7 @@ exclude_files:
 MANIFEST
     end
 
-    files_to_include << '.full.manifest.yml'
+    files_to_include << 'manifest-including-unsupported.yml'
   end
 
   def create_invalid_manifest
@@ -139,28 +139,49 @@ MANIFEST
   end
 
   describe 'flags' do
-    describe '--use-full-manifest' do
-      let(:flags) { '--use-full-manifest' }
+    describe '--use-custom-manifest' do
       let(:mode) { 'uncached' }
 
       before do
         create_manifests
       end
 
-      it 'uses the full manifest' do
-        run_packager_binary(buildpack_dir, mode, flags)
+      context 'with the flag' do
+        let(:flags) { '--use-custom-manifest=manifest-including-unsupported.yml' }
 
-        manifest_location = File.join(Dir.mktmpdir, 'manifest.yml')
-        zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
+        it 'uses the specified manifest' do
+          run_packager_binary(buildpack_dir, mode, flags)
 
-        Zip::File.open(zip_file_path) do |zip_file|
-          generated_manifest = zip_file.find { |file| file.name == 'manifest.yml' }
-          generated_manifest.extract(manifest_location)
+          manifest_location = File.join(Dir.mktmpdir, 'manifest.yml')
+          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
+
+          Zip::File.open(zip_file_path) do |zip_file|
+            generated_manifest = zip_file.find { |file| file.name == 'manifest.yml' }
+            generated_manifest.extract(manifest_location)
+          end
+
+          manifest_contents = File.read(manifest_location)
+
+          expect(manifest_contents).to eq(File.read(File.join(buildpack_dir, 'manifest-including-unsupported.yml')))
         end
+      end
 
-        manifest_contents = File.read(manifest_location)
+      context 'without the flag' do
+        it 'uses the skinny manifest' do
+          run_packager_binary(buildpack_dir, mode)
 
-        expect(manifest_contents).to eq(File.read(File.join(buildpack_dir, '.full.manifest.yml')))
+          manifest_location = File.join(Dir.mktmpdir, 'manifest.yml')
+          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
+
+          Zip::File.open(zip_file_path) do |zip_file|
+            generated_manifest = zip_file.find { |file| file.name == 'manifest.yml' }
+            generated_manifest.extract(manifest_location)
+          end
+
+          manifest_contents = File.read(manifest_location)
+
+          expect(manifest_contents).to eq(File.read(File.join(buildpack_dir, 'manifest.yml')))
+        end
       end
     end
   end

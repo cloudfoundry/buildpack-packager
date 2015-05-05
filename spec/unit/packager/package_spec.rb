@@ -35,7 +35,7 @@ module Buildpack
 
       describe '#copy_buildpack_to_temp_dir' do
         context 'with full manifest specified' do
-          let(:manifest_path) { '.full.manifest.yml' }
+          let(:manifest_path) { 'manifest-including-unsupported.yml' }
 
           before do
             allow(FileUtils).to receive(:mv)
@@ -44,7 +44,7 @@ module Buildpack
           end
 
           it 'replaces the default manifest with the full manifest' do
-            expect(FileUtils).to receive(:mv).with(File.join('hello_dir', '.full.manifest.yml'), File.join('hello_dir', 'manifest.yml'))
+            expect(FileUtils).to receive(:mv).with(File.join('hello_dir', 'manifest-including-unsupported.yml'), File.join('hello_dir', 'manifest.yml'))
             packager.copy_buildpack_to_temp_dir('hello_dir')
           end
         end

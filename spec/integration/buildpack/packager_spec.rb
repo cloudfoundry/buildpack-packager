@@ -3,12 +3,19 @@ require 'tmpdir'
 
 module Buildpack
   describe Packager do
-    let(:tmp_dir) { Dir.mktmpdir }
+    let(:tmp_dir) do
+      dir = FileUtils.mkdir_p(File.join(Dir.mktmpdir, rand.to_s[2..-1]))[0]
+      puts dir
+      dir
+    end
     let(:buildpack_dir) { File.join(tmp_dir, 'sample-buildpack-root-dir') }
     let(:cache_dir) { File.join(tmp_dir, 'cache-dir') }
     let(:file_location) do
       location = File.join(tmp_dir, 'sample_host')
       File.write(location, 'contents!')
+      puts "FILE CONTENTS--------------------"
+      puts location
+      puts `cat #{location}`
       location
     end
     let(:translated_file_location) { 'file___' + file_location.gsub(/[:\/]/, '_') }
@@ -24,7 +31,7 @@ module Buildpack
       }
     }
 
-    let(:manifest_path) { File.join(buildpack_dir, 'manifest.yml') }
+    let(:manifest_path) { 'manifest.yml' }
     let(:manifest) {
       {
         exclude_files: files_to_exclude,
@@ -62,14 +69,11 @@ module Buildpack
     let(:cached_file) { File.join(cache_dir, translated_file_location) }
 
     def create_manifest(manifest)
-      File.open(manifest_path, 'w') { |f| f.write manifest.to_yaml }
+      File.write(File.join(buildpack_dir, manifest_path), manifest.to_yaml)
     end
 
     before do
-      make_fake_files(
-        buildpack_dir,
-        files
-      )
+      make_fake_files(buildpack_dir, files)
       files_to_include << 'manifest.yml'
       create_manifest(manifest)
       `echo "1.2.3" > #{File.join(buildpack_dir, 'VERSION')}`
@@ -90,11 +94,13 @@ module Buildpack
         end
       end
 
-      context 'an cached buildpack' do
+      context 'a cached buildpack' do
         let(:buildpack_mode) { :cached }
 
         specify do
-          Packager.package(options)
+          puts `ls #{buildpack_dir}`
+
+          puts Packager.package(options)
 
           expect(all_files(buildpack_dir)).to include('sample_buildpack-cached-v1.2.3.zip')
         end

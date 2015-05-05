@@ -26,8 +26,8 @@ OptionParser.new do |opts|
     options[:force_download] = true 
   end
 
-  opts.on("--use-full-manifest", "Use manifest containing full set of dependencies") do
-    options[:manifest_path] = '.full.manifest.yml'
+  opts.on("--use-custom-manifest=", "Use custom manifest--specify the path as an argument") do |manifest_path|
+    options[:manifest_path] = manifest_path
   end
 end.parse!
 
