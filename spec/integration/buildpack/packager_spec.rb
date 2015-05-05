@@ -77,9 +77,13 @@ module Buildpack
       files_to_include << 'manifest.yml'
       create_manifest(manifest)
       `echo "1.2.3" > #{File.join(buildpack_dir, 'VERSION')}`
+
+      @pwd ||= Dir.pwd
+      Dir.chdir(buildpack_dir)
     end
 
     after do
+      Dir.chdir(@pwd)
       FileUtils.remove_entry tmp_dir
     end
 

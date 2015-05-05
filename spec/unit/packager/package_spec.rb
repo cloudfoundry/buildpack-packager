@@ -40,11 +40,12 @@ module Buildpack
           before do
             allow(FileUtils).to receive(:mv)
             allow(FileUtils).to receive(:cp_r)
+            allow(FileUtils).to receive(:cp)
             allow(FileUtils).to receive(:rm)
           end
 
           it 'replaces the default manifest with the full manifest' do
-            expect(FileUtils).to receive(:mv).with(File.join('hello_dir', 'manifest-including-unsupported.yml'), File.join('hello_dir', 'manifest.yml'))
+            expect(FileUtils).to receive(:cp).with('manifest-including-unsupported.yml', File.join('hello_dir', 'manifest.yml'))
             packager.copy_buildpack_to_temp_dir('hello_dir')
           end
         end

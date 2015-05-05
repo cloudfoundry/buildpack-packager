@@ -45,10 +45,20 @@ module Buildpack
       }
     end
 
+    before do
+      @pwd ||= Dir.pwd
+      Dir.chdir(root_dir)
+    end
+
+    after do
+      Dir.chdir(@pwd)
+    end
+
     describe 'directory naming structure' do
       before do
         allow_any_instance_of(Packager::Package).to receive(:buildpack_version).and_return('1.0.0')
         allow_any_instance_of(Packager::Package).to receive(:manifest).and_return(manifest)
+        allow(FileUtils).to receive(:cp)
         Packager.package(options)
       end
 

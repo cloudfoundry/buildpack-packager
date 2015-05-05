@@ -10,10 +10,7 @@ module Buildpack
     class Package < Struct.new(:options)
       def copy_buildpack_to_temp_dir(temp_dir)
         FileUtils.cp_r(File.join(options[:root_dir], '.'), temp_dir)
-
-        unless options[:manifest_path] == 'manifest.yml'
-          FileUtils.mv(File.join(temp_dir, options[:manifest_path]), File.join(temp_dir, 'manifest.yml'))
-        end
+        FileUtils.cp(options[:manifest_path], File.join(temp_dir, 'manifest.yml'))
       end
 
       def build_dependencies(temp_dir)
@@ -59,8 +56,7 @@ module Buildpack
       end
 
       def manifest
-        absolute_manifest_path = File.join(options[:root_dir], options[:manifest_path])
-        @manifest ||= YAML.load_file(absolute_manifest_path).with_indifferent_access
+        @manifest ||= YAML.load_file(options[:manifest_path]).with_indifferent_access
       end
 
       def zip_file_path
