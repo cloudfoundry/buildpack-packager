@@ -7,7 +7,7 @@ SUPPORTED_MODES = %w{cached uncached}
 USAGE_MSG = "USAGE: #{File.basename(__FILE__)} [options] #{SUPPORTED_MODES.join('|')}"
 
 options = {
-  root_dir: `pwd`.chomp,
+  root_dir:      Dir.pwd,
   manifest_path: 'manifest.yml',
   force_download: false
 }
