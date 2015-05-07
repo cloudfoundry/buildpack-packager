@@ -6,7 +6,7 @@ require 'buildpack/manifest_validator'
 SUPPORTED_MODES = %w{cached uncached}
 USAGE_MSG = "Usage:\n  #{File.basename(__FILE__)} #{SUPPORTED_MODES.join('|')} --force-download"
 
-if ! SUPPORTED_MODES.include?(ARGV[0])
+def usage_and_exit
   STDOUT.puts USAGE_MSG
   exit 1
 end
@@ -14,7 +14,6 @@ end
 options = {
   root_dir: `pwd`.chomp,
   manifest_path: 'manifest.yml',
-  mode: ARGV[0].to_sym,
   force_download: false
 }
 
@@ -29,6 +28,14 @@ OptionParser.new do |opts|
     options[:manifest_path] = manifest_path
   end
 end.parse!
+
+mode = ARGV[0]
+if SUPPORTED_MODES.include?(ARGV[0])
+  options[:mode] = mode.to_sym
+else
+  puts "ERROR: Unknown mode '#{mode}'" if mode
+  usage_and_exit
+end
 
 manifest_path = options[:manifest_path]
 unless File.exist?(manifest_path)
