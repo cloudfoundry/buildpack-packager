@@ -3,12 +3,11 @@ require 'buildpack/packager'
 require 'optparse'
 require 'buildpack/manifest_validator'
 
-supported_modes = %w{cached uncached}
+SUPPORTED_MODES = %w{cached uncached}
+USAGE_MSG = "Usage:\n  #{File.basename(__FILE__)} #{SUPPORTED_MODES.join('|')} --force-download"
 
-usage_msg = "Usage:\n  #{File.basename(__FILE__)} #{supported_modes.join('|')} --force-download"
-
-if !supported_modes.include?(ARGV[0])
-  STDOUT.puts usage_msg
+if ! SUPPORTED_MODES.include?(ARGV[0])
+  STDOUT.puts USAGE_MSG
   exit 1
 end
 
@@ -20,7 +19,7 @@ options = {
 }
 
 OptionParser.new do |opts|
-  opts.banner = usage_msg
+  opts.banner = USAGE_MSG
 
   opts.on("--force-download", "Force dependencies to be downloaded from the internet") do
     options[:force_download] = true 
