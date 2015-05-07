@@ -3,33 +3,42 @@ require 'buildpack/packager'
 require 'optparse'
 require 'buildpack/manifest_validator'
 
-supported_modes = %w{cached uncached}
-
-usage_msg = "Usage:\n  #{File.basename(__FILE__)} #{supported_modes.join('|')} --force-download"
-
-if !supported_modes.include?(ARGV[0])
-  STDOUT.puts usage_msg
-  exit 1
-end
+SUPPORTED_MODES = %w{cached uncached}
+USAGE_MSG = "USAGE: #{File.basename(__FILE__)} [options] #{SUPPORTED_MODES.join('|')}"
 
 options = {
-  root_dir: `pwd`.chomp,
+  root_dir:      Dir.pwd,
   manifest_path: 'manifest.yml',
-  mode: ARGV[0].to_sym,
   force_download: false
 }
 
-OptionParser.new do |opts|
-  opts.banner = usage_msg
+optparser = OptionParser.new do |opts|
+  opts.banner = USAGE_MSG
 
-  opts.on("--force-download", "Force dependencies to be downloaded from the internet") do
+  opts.on("--force-download", "Force dependencies to be downloaded from the internet. (default is false)") do
     options[:force_download] = true 
   end
 
-  opts.on("--use-custom-manifest=", "Use custom manifest--specify the path as an argument") do |manifest_path|
+  opts.on("--use-custom-manifest=PATH_TO_MANIFEST", "Use a custom manifest, passing the path as an argument.") do |manifest_path|
     options[:manifest_path] = manifest_path
   end
-end.parse!
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end
+
+optparser.parse!
+
+mode = ARGV[0]
+if SUPPORTED_MODES.include?(ARGV[0])
+  options[:mode] = mode.to_sym
+else
+  puts "ERROR: Unknown mode '#{mode}'" if mode
+  puts optparser
+  exit 1
+end
 
 manifest_path = options[:manifest_path]
 unless File.exist?(manifest_path)
