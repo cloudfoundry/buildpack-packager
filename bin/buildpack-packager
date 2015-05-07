@@ -19,8 +19,13 @@ optparser = OptionParser.new do |opts|
     options[:force_download] = true 
   end
 
-  opts.on("--use-custom-manifest=", "Use a custom manifest, passing the path as an argument.") do |manifest_path|
+  opts.on("--use-custom-manifest=PATH_TO_MANIFEST", "Use a custom manifest, passing the path as an argument.") do |manifest_path|
     options[:manifest_path] = manifest_path
+  end
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
   end
 end
 
