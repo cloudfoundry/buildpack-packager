@@ -5,10 +5,6 @@ require 'file_system_helpers'
 require 'cache_directory_helpers'
 require 'fake_binary_hosting_helpers'
 
-unless system("which tree")
-  raise "Please install the `tree` commandline tool."
-end
-
 RSpec.configure do |config|
   config.include FileSystemHelpers
   config.include CacheDirectoryHelpers

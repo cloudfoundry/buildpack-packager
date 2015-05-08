@@ -1,4 +1,5 @@
 require 'zip'
+require 'fileutils'
 
 module FileSystemHelpers
   def run_packager_binary(buildpack_dir, mode, flags = '')
@@ -9,15 +10,15 @@ module FileSystemHelpers
   def make_fake_files(root, file_list)
     file_list.each do |file|
       full_path = File.join(root, file)
-      `mkdir -p #{File.dirname(full_path)}`
-      `echo 'a' > #{full_path}`
+      FileUtils.mkdir_p(File.dirname(full_path))
+      File.write(full_path, 'a')
     end
   end
 
   def all_files(root)
-    `tree -afi --noreport #{root}`.
-        split("\n").
-        map { |filename| filename.gsub(root, "").gsub(/^\//, "") }
+    Dir["#{root}/*"].map do
+      |filename| filename.gsub(root, "").gsub(/^\//, "")
+    end
   end
 
   def get_zip_contents(zip_path)
