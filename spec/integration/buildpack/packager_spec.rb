@@ -34,7 +34,7 @@ module Buildpack
     let(:manifest_path) { 'manifest.yml' }
     let(:manifest) {
       {
-        exclude_files: files_to_exclude,
+        exclude_files: [],
         language: 'sample',
         url_to_dependency_map: [{
           match: "ruby-(\d+\.\d+\.\d+)",
@@ -50,7 +50,7 @@ module Buildpack
       }
     }
 
-    let(:files_to_include) {
+    let(:buildpack_files) {
       [
         'VERSION',
         'README.md',
@@ -60,27 +60,22 @@ module Buildpack
         'first-level/log/log.txt',
         'log.txt',
         'blog.txt',
-        'blog/blog.txt'
-      ]
-    }
-
-    let(:files_to_exclude) {
-      [
+        'blog/blog.txt',
         '.gitignore'
       ]
     }
 
-    let(:files) { files_to_include + files_to_exclude }
     let(:cached_file) { File.join(cache_dir, translated_file_location) }
 
-    def create_manifest(manifest)
+    def create_manifest(options = {})
+      manifest.merge!(options)
       File.write(File.join(buildpack_dir, manifest_path), manifest.to_yaml)
     end
 
     before do
-      make_fake_files(buildpack_dir, files)
-      files_to_include << 'manifest.yml'
-      create_manifest(manifest)
+      make_fake_files(buildpack_dir, buildpack_files)
+      buildpack_files << 'manifest.yml'
+      create_manifest
       `echo "1.2.3" > #{File.join(buildpack_dir, 'VERSION')}`
 
       @pwd ||= Dir.pwd
@@ -127,7 +122,7 @@ module Buildpack
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
 
-          expect(zip_contents).to match_array(files_to_include)
+          expect(zip_contents).to match_array(buildpack_files)
         end
       end
 
@@ -142,7 +137,7 @@ module Buildpack
           zip_contents = get_zip_contents(zip_file_path)
           dependencies = ["dependencies/#{translated_file_location}"]
 
-          expect(zip_contents).to match_array(files_to_include + dependencies)
+          expect(zip_contents).to match_array(buildpack_files + dependencies)
         end
       end
     end
@@ -150,30 +145,21 @@ module Buildpack
     describe 'excluded files' do
       let(:buildpack_mode) { :uncached }
 
-      it 'excludes files from exclude_files list in the manifest' do
-        Packager.package(options)
-
-        zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
-        zip_contents = get_zip_contents(zip_file_path)
-
-        expect(zip_contents).to_not include(*files_to_exclude)
-      end
-
-      context 'when appending an exclusion for the zip file' do
-        specify do
-          create_manifest(manifest.merge(exclude_files: files_to_exclude + ['VERSION']))
+      context 'when specifying files for exclusion' do
+        it 'excludes files from zip files' do
+          create_manifest(exclude_files: ['.gitignore'])
           Packager.package(options)
 
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
 
-          expect(zip_contents).to_not include('VERSION')
+          expect(zip_contents).to_not include('.gitignore')
         end
       end
 
       context 'when using a directory pattern in exclude_files' do
         it 'excludes directories with that name' do
-          create_manifest(manifest.merge(exclude_files: files_to_exclude + ['log/']))
+          create_manifest(exclude_files: ['log/'])
           Packager.package(options)
 
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
@@ -188,7 +174,7 @@ module Buildpack
 
       context 'when using glob patterns in exclude_files' do
         it 'can accept glob patterns' do
-          create_manifest(manifest.merge(exclude_files: files_to_exclude + ['*log.txt']))
+          create_manifest(exclude_files: ['*log.txt'])
           Packager.package(options)
 
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
@@ -202,7 +188,7 @@ module Buildpack
         end
 
         it 'does not do fuzzy matching by default' do
-          create_manifest(manifest.merge(exclude_files: files_to_exclude + ['log.txt']))
+          create_manifest(exclude_files: ['log.txt'])
           Packager.package(options)
 
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
