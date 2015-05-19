@@ -1,5 +1,5 @@
 module Buildpack
   module Packager
-    VERSION = "0.0.1"
+    VERSION = "2.2.0"
   end
 end
