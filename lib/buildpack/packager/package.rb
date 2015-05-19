@@ -99,7 +99,13 @@ module Buildpack
       end
 
       def zip_files(source_dir, zip_file_path, excluded_files)
-        exclude_list = excluded_files.map { |file| "--exclude=*#{file}*" }.join(' ')
+        exclude_list = excluded_files.map do |file|
+          if file.chars.last == '/'
+            "--exclude=#{file}* --exclude=*/#{file}*"
+          else
+            "--exclude=#{file} --exclude=*/#{file}"
+          end
+        end.join(' ')
         `cd #{source_dir} && zip -r #{zip_file_path} ./ #{exclude_list}`
       end
     end

@@ -56,6 +56,11 @@ module Buildpack
         'README.md',
         'lib/sai.to',
         'lib/rash',
+        'log/log.txt',
+        'first-level/log/log.txt',
+        'log.txt',
+        'blog.txt',
+        'blog/blog.txt'
       ]
     }
 
@@ -145,7 +150,7 @@ module Buildpack
     describe 'excluded files' do
       let(:buildpack_mode) { :uncached }
 
-      specify do
+      it 'excludes files from exclude_files list in the manifest' do
         Packager.package(options)
 
         zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
@@ -156,7 +161,6 @@ module Buildpack
 
       context 'when appending an exclusion for the zip file' do
         specify do
-          Packager.package(options)
           create_manifest(manifest.merge(exclude_files: files_to_exclude + ['VERSION']))
           Packager.package(options)
 
@@ -164,6 +168,48 @@ module Buildpack
           zip_contents = get_zip_contents(zip_file_path)
 
           expect(zip_contents).to_not include('VERSION')
+        end
+      end
+
+      context 'when using a directory pattern in exclude_files' do
+        it 'excludes directories with that name' do
+          create_manifest(manifest.merge(exclude_files: files_to_exclude + ['log/']))
+          Packager.package(options)
+
+          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
+          zip_contents = get_zip_contents(zip_file_path)
+
+          expect(zip_contents).to_not include('first-level/log/log.txt')
+          expect(zip_contents).to_not include('log/log.txt')
+          expect(zip_contents).to include('blog/blog.txt')
+          expect(zip_contents).to include('log.txt')
+        end
+      end
+
+      context 'when using glob patterns in exclude_files' do
+        it 'can accept glob patterns' do
+          create_manifest(manifest.merge(exclude_files: files_to_exclude + ['*log.txt']))
+          Packager.package(options)
+
+          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
+          zip_contents = get_zip_contents(zip_file_path)
+
+          expect(zip_contents).to_not include('log.txt')
+          expect(zip_contents).to_not include('log/log.txt')
+          expect(zip_contents).to_not include('first-level/log/log.txt')
+          expect(zip_contents).to_not include('blog/blog.txt')
+          expect(zip_contents).to_not include('blog.txt')
+        end
+
+        it 'does not do fuzzy matching by default' do
+          create_manifest(manifest.merge(exclude_files: files_to_exclude + ['log.txt']))
+          Packager.package(options)
+
+          zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
+          zip_contents = get_zip_contents(zip_file_path)
+
+          expect(zip_contents).to_not include('log.txt')
+          expect(zip_contents).to include('blog.txt')
         end
       end
     end
