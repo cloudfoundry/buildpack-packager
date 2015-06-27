@@ -138,6 +138,36 @@ MANIFEST
     FileUtils.remove_entry tmp_dir
   end
 
+  describe 'list mode' do
+    let(:mode) { 'list' }
+
+    before do
+      create_manifests
+    end
+
+    context 'default manifest' do
+      it 'emits a table of contents' do
+        output = run_packager_binary(buildpack_dir, mode)
+        stdout = output.first
+
+        expect(stdout).to match(/fake_name.*1\.2/)
+        expect(stdout).to match(/------/) # it's a table!
+      end
+    end
+
+    context 'custom manifest' do
+      let(:flags) { '--use-custom-manifest=manifest-including-unsupported.yml' }
+      it 'emits a table of contents' do
+        output = run_packager_binary(buildpack_dir, mode, flags)
+        stdout = output.first
+
+        expect(stdout).to match(/fake_name.*1\.1/)
+        expect(stdout).to match(/fake_name.*1\.2/)
+        expect(stdout).to match(/------/) # it's a table!
+      end
+    end
+  end
+
   describe 'flags' do
     describe '--use-custom-manifest' do
       let(:mode) { 'uncached' }
@@ -218,7 +248,7 @@ MANIFEST
       specify do
         output, status = run_packager_binary(buildpack_dir, mode)
 
-        expect(output).to include("USAGE: buildpack-packager [options] cached|uncached")
+        expect(output).to include("USAGE: buildpack-packager [options] < cached | uncached | list >")
         expect(status).not_to be_success
       end
     end
@@ -229,7 +259,7 @@ MANIFEST
       it 'reports proper usage' do
         output, status = run_packager_binary(buildpack_dir, mode)
 
-        expect(output).to include("USAGE: buildpack-packager [options] cached|uncached")
+        expect(output).to include("USAGE: buildpack-packager [options] < cached | uncached | list >")
         expect(status).not_to be_success
       end
     end

@@ -4,6 +4,7 @@ require 'fileutils'
 require 'tmpdir'
 require 'yaml'
 require 'shellwords'
+require 'terminal-table'
 
 module Buildpack
   module Packager
@@ -47,6 +48,19 @@ module Buildpack
       def build_zip_file(temp_dir)
         FileUtils.rm_rf(zip_file_path)
         zip_files(temp_dir, zip_file_path, manifest[:exclude_files])
+      end
+
+      def list
+        Terminal::Table.new do |table|
+          manifest["dependencies"].each do |dependency|
+            table.add_row [
+              dependency["name"],
+              sanitize_version_string(dependency["version"]),
+              dependency["cf_stacks"].sort.join(",")
+            ]
+          end
+          table.headings = ["name", "version", "cf_stacks"]
+        end
       end
 
       private
@@ -107,6 +121,10 @@ module Buildpack
           end
         end.join(' ')
         `cd #{source_dir} && zip -r #{zip_file_path} ./ #{exclude_list}`
+      end
+
+      def sanitize_version_string version
+        version == 0 ? "-" : version
       end
     end
   end

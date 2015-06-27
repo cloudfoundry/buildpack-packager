@@ -29,6 +29,11 @@ module Buildpack
       package
     end
 
+    def self.list(options)
+      package = Package.new(options)
+      package.list
+    end
+
     def self.check_for_zip
       _, _, status = Open3.capture3("which zip")
 

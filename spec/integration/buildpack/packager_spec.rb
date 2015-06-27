@@ -45,7 +45,8 @@ module Buildpack
           'version' => '1.0',
           'name' => 'etc_host',
           'md5' => md5,
-          'uri' => "file://#{file_location}"
+          'uri' => "file://#{file_location}",
+          'cf_stacks' => ['cflinuxfs2']
         }]
       }
     }
@@ -85,6 +86,28 @@ module Buildpack
     after do
       Dir.chdir(@pwd)
       FileUtils.remove_entry tmp_dir
+    end
+
+    describe '#list' do
+      let(:buildpack_mode) { :list }
+
+      context "default manifest.yml" do
+        specify do
+          create_manifest
+          table = Packager.list(options)
+          expect(table.to_s).to match(/etc_host.*1\.0.*cflinuxfs2/)
+        end
+      end
+
+      context "alternate manifest path" do
+        let(:manifest_path) { 'my-manifest.yml' }
+
+        specify do
+          create_manifest
+          table = Packager.list(options)
+          expect(table.to_s).to match(/etc_host.*1\.0.*cflinuxfs2/)
+        end
+      end
     end
 
     describe 'a well formed zip file name' do
