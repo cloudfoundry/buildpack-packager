@@ -32,7 +32,7 @@ end
 optparser.parse!
 
 mode = ARGV[0]
-if SUPPORTED_MODES.include?(ARGV[0])
+if SUPPORTED_MODES.include?(mode)
   options[:mode] = mode.to_sym
 else
   puts "ERROR: Unknown mode '#{mode}'" if mode
