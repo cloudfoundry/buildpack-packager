@@ -22,6 +22,36 @@ In `cached` mode, the packager will download and add dependencies as
 described in the manifest.
 
 
+## Examining a manifest
+
+If you'd like to get a pretty-printed summary of what's in a manifest,
+run in `list` mode:
+
+    `buildpack-packager list`
+
+Example output:
+
+```
++----------------------------+------------------------------+------------+
+| name                       | version                      | cf_stacks  |
++----------------------------+------------------------------+------------+
+| ruby                       | 2.0.0                        | cflinuxfs2 |
+| ruby                       | 2.1.5                        | cflinuxfs2 |
+| ruby                       | 2.1.6                        | cflinuxfs2 |
+| ruby                       | 2.2.1                        | cflinuxfs2 |
+| ruby                       | 2.2.2                        | cflinuxfs2 |
+| jruby                      | ruby-1.9.3-jruby-1.7.19      | cflinuxfs2 |
+| jruby                      | ruby-2.0.0-jruby-1.7.19      | cflinuxfs2 |
+| jruby                      | ruby-2.2.2-jruby-9.0.0.0.rc1 | cflinuxfs2 |
+| node                       | 0.12.2                       | cflinuxfs2 |
+| bundler                    | 1.9.7                        | cflinuxfs2 |
+| libyaml                    | 0.1.6                        | cflinuxfs2 |
+| openjdk1.8-latest          | -                            | cflinuxfs2 |
+| rails3_serve_static_assets | -                            | cflinuxfs2 |
+| rails_log_stdout           | -                            | cflinuxfs2 |
++----------------------------+------------------------------+------------+
+```
+
 ### Option Flags
 
 #### --force-download
