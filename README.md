@@ -1,33 +1,54 @@
-BUILDPACK PACKAGER
+Buildpack Packager
 ==================
 
-Simple tool to package a buildpack to upload to Cloud Foundry.
+Tooling to package a buildpack for upload to Cloud Foundry.
+
 
 Usage
 =====
 
+## Packaging a Buildpack
+
 1. Create a `manifest.yml` in your buildpack
-1. Run the packager for uncached or cached mode
-`buildpack-packager [cached|uncached]`
+1. Run the packager for uncached or cached mode:
 
-In either mode, the packager will add (almost) everything in your buildpack directory into a zip file.
-It will exclude anything marked for exclusion in your manifest.
+    `buildpack-packager [cached|uncached]`
 
-In cached mode, the packager will download and add dependencies as described in the manifest.
+In either mode, the packager will add (almost) everything in your
+buildpack directory into a zip file.  It will exclude anything marked
+for exclusion in your manifest.
 
-###Option Flags
-####--force-download
-By default, `buildpack-packager` stores the dependencies that it downloads while building a cached buildpack in a local cache at `~/.buildpack-packager`. This is in order to avoid redownloading them when repackaging similar buildpacks. Running `buildpack-packager cached` with the the `--force-download` option will force the packager to download dependencies from the s3 host and ignore the local cache.
+In `cached` mode, the packager will download and add dependencies as
+described in the manifest.
 
-####--use-custom-manifest
-If you would like to include a different manifest file in your packaged buildpack, you may call `buildpack-packager` with the the `--use-custom-manifest [path/to/manifest.yml]` option. `buildpack-packager` will generate a buildpack with the specified manifest. If you are building a cached buildpack, `buildpack-packager` will vendor dependencies from the specified manifest as well.
+
+### Option Flags
+
+#### --force-download
+
+By default, `buildpack-packager` stores the dependencies that it
+downloads while building a cached buildpack in a local cache at
+`~/.buildpack-packager`. This is in order to avoid redownloading them
+when repackaging similar buildpacks. Running `buildpack-packager
+cached` with the the `--force-download` option will force the packager
+to download dependencies from the s3 host and ignore the local cache.
+
+#### --use-custom-manifest
+
+If you would like to include a different manifest file in your
+packaged buildpack, you may call `buildpack-packager` with the the
+`--use-custom-manifest [path/to/manifest.yml]`
+option. `buildpack-packager` will generate a buildpack with the
+specified manifest. If you are building a cached buildpack,
+`buildpack-packager` will vendor dependencies from the specified
+manifest as well.
 
 
 Manifest
 ========
 
-The packager looks for a `manifest.yml` file in the current working directory, which should be the root of your
- buildpack.
+The packager looks for a `manifest.yml` file in the current working
+directory, which should be the root of your buildpack.
 
 A sample manifest (all keys are required):
 
@@ -66,27 +87,45 @@ exclude_files:
 
 language (required)
 --------
+
 The language key is used to give your zip file a meaningful name.
+
 
 url_to_dependency_map (required)
 ---------
+
 A list of regular expressions that extract and map the values of `name` and `version` to a corresponding dependency. 
+
 
 dependencies (required)
 ------------
-The dependencies key specifies the name, version, uri, md5, and the cf_stacks (the root file system(s) for which it is compiled for) of a resource which the buildpack attempts to download during staging. By specifying them here, the packager can download them and install them into the `dependencies/` folder in the zip file.
+
+The dependencies key specifies the name, version, uri, md5, and the
+cf_stacks (the root file system(s) for which it is compiled for) of a
+resource which the buildpack attempts to download during staging. By
+specifying them here, the packager can download them and install them
+into the `dependencies/` folder in the zip file.
 
 All keys are required:
 
-- `name`, `version`, and `uri`: Required for `url_to_dependency_map` to work. Make sure to create a new entry in the `url_to_dependency_map` if a matching regex does not exist for the dependency to be curled.
-- `md5`: Required to ensure that dependencies being packaged for 'cached' mode have not been compromised
-- `cf_stacks`: Required to ensure the right binary is selected for the root file system in which an app will be running on.  Currently supported root file systems are lucid64(default) and cflinuxfs2. *Note that if the same dependency is
-used for both root file systems, both can be listed under the `cf_stacks` key.*
+- `name`, `version`, and `uri`:
+Required for `url_to_dependency_map` to work. Make sure to create a new entry in the `url_to_dependency_map` if a matching regex does not exist for the dependency to be curled.
 
-To have your buildpack use these 'cached' dependencies, use `compile_extensions/bin/translate_dependency_url` to translate the url into a locally cached url (useful for cached mode).
+- `md5`:
+Required to ensure that dependencies being packaged for 'cached' mode have not been compromised
+
+- `cf_stacks`:
+Required to ensure the right binary is selected for the root file system in which an app will be running on.  Currently supported root file systems are lucid64(default) and cflinuxfs2. *Note that if the same dependency is used for both root file systems, both can be listed under the `cf_stacks` key.*
+
+To have your buildpack use these 'cached' dependencies, use
+`compile_extensions/bin/translate_dependency_url` to translate the url
+into a locally cached url (useful for cached mode).
+
 Read more on the [compile-extensions repo](https://github.com/cf-buildpacks/compile-extensions/).
+
 
 exclude_files (required)
 -------------
-The exclude key lists files you do not want in your buildpack. This is useful to remove sensitive information before uploading.
 
+The exclude key lists files you do not want in your buildpack. This is
+useful to remove sensitive information before uploading.
