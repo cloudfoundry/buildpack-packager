@@ -108,6 +108,76 @@ module Buildpack
           expect(table.to_s).to match(/etc_host.*1\.0.*cflinuxfs2/)
         end
       end
+
+      context 'sorted output' do
+        def create_manifest_dependency_skeleton dependencies
+          manifest = {}
+          manifest['dependencies'] = []
+          dependencies.each do |dependency|
+            manifest['dependencies'].push({
+                'name': dependency.first,
+                'version': dependency.last,
+                'cf_stacks': ['cflinuxfs2']
+              })
+          end
+          File.write(File.join(buildpack_dir, manifest_path), manifest.to_yaml)
+        end
+
+        %w[go hhvm jruby node php python ruby].each do |interpreter|
+          it "sorts #{interpreter} interpreter first" do
+            create_manifest_dependency_skeleton([
+                ["aaaaa", "1.0"],
+                [interpreter, "1.0"],
+                ["zzzzz", "1.0"]
+              ])
+            table = Packager.list(options)
+            stdout = table.to_s.split("\n")
+
+            position_of_a = stdout.index(stdout.grep(/aaaaa/).first)
+            position_of_interpreter = stdout.index(stdout.grep(/ #{interpreter} /).first)
+            position_of_z = stdout.index(stdout.grep(/zzzzz/).first)
+
+            expect(position_of_interpreter).to be < position_of_a
+            expect(position_of_interpreter).to be < position_of_z
+          end
+        end
+
+        it 'sorts using `name` as secondary key' do
+          create_manifest_dependency_skeleton([
+              ["b_foobar", "1.0"],
+              ["a_foobar", "1.0"],
+              ["c_foobar", "1.0"]
+            ])
+          table = Packager.list(options)
+          stdout = table.to_s.split("\n")
+
+          position_of_a = stdout.index(stdout.grep(/a_foobar/).first)
+          position_of_b = stdout.index(stdout.grep(/b_foobar/).first)
+          position_of_c = stdout.index(stdout.grep(/c_foobar/).first)
+
+          expect(position_of_a).to be < position_of_b
+          expect(position_of_b).to be < position_of_c
+        end
+
+        it 'sorts using `version` as secondary key' do
+          create_manifest_dependency_skeleton([
+              ["foobar", "1.1"],
+              ["foobar", "1.2"],
+              ["foobar", "1.0"]
+            ])
+          table = Packager.list(options)
+          stdout = table.to_s.split("\n")
+
+          position_of_10 = stdout.index(stdout.grep(/1\.0/).first)
+          position_of_11 = stdout.index(stdout.grep(/1\.1/).first)
+          position_of_12 = stdout.index(stdout.grep(/1\.2/).first)
+
+          expect(position_of_10).to be < position_of_11
+          expect(position_of_11).to be < position_of_12
+        end
+
+      end
+
     end
 
     describe 'a well formed zip file name' do

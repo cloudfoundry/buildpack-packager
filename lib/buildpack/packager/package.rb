@@ -52,7 +52,9 @@ module Buildpack
 
       def list
         Terminal::Table.new do |table|
-          manifest["dependencies"].each do |dependency|
+          manifest["dependencies"].sort_by do |dependency|
+            sort_string_for dependency
+          end.each do |dependency|
             table.add_row [
               dependency["name"],
               sanitize_version_string(dependency["version"]),
@@ -125,6 +127,12 @@ module Buildpack
 
       def sanitize_version_string version
         version == 0 ? "-" : version
+      end
+
+      def sort_string_for dependency
+        interpreter_names = %w[ruby jruby php hhvm python go node]
+        sort_index = interpreter_names.index(dependency["name"]) || 9999
+        sprintf "%s-%s-%s", sort_index, dependency["name"], dependency["version"]
       end
     end
   end
