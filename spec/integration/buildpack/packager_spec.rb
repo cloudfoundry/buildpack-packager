@@ -115,9 +115,9 @@ module Buildpack
           manifest['dependencies'] = []
           dependencies.each do |dependency|
             manifest['dependencies'].push({
-                'name': dependency.first,
-                'version': dependency.last,
-                'cf_stacks': ['cflinuxfs2']
+                'name'      => dependency.first,
+                'version'   => dependency.last,
+                'cf_stacks' => ['cflinuxfs2']
               })
           end
           File.write(File.join(buildpack_dir, manifest_path), manifest.to_yaml)
