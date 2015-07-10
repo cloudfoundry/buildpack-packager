@@ -1,4 +1,5 @@
 require 'buildpack/packager/version'
+require 'buildpack/packager/dependencies_presenter'
 require 'buildpack/packager/package'
 require 'active_support/core_ext/hash/indifferent_access'
 require 'open3'
