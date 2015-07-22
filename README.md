@@ -1,18 +1,24 @@
-Buildpack Packager
-==================
+# Buildpack Packager
 
-Tooling to package a buildpack for upload to Cloud Foundry.
+A [RubyGem](https://rubygems.org/) that provides tooling to package a buildpack for upload to Cloud Foundry.
+
+For officially supported Cloud Foundry buildpacks, it used in conjunction with [compile-extensions](https://github.com/cloudfoundry-incubator/compile-extensions).
 
 
-Usage
-=====
+# Usage
 
 ## Packaging a Buildpack
 
-1. Create a `manifest.yml` in your buildpack
+Within your buildpack directory:
+
+1. Create a `Gemfile` and the line `gem 'buildpack-packager', git: 'https://github.com/cloudfoundry-incubator/buildpack-packager'`.
+1. Run `bundle install`.
+1. Create a `manifest.yml`
 1. Run the packager for uncached or cached mode:
 
-    `buildpack-packager [cached|uncached]`
+	```
+	buildpack-packager [cached|uncached]
+	```
 
 In either mode, the packager will add (almost) everything in your
 buildpack directory into a zip file.  It will exclude anything marked
@@ -27,7 +33,9 @@ described in the manifest.
 If you'd like to get a pretty-printed summary of what's in a manifest,
 run in `list` mode:
 
-    `buildpack-packager list`
+```
+buildpack-packager list
+```
 
 Example output:
 
@@ -74,16 +82,14 @@ specified manifest. If you are building a cached buildpack,
 manifest as well.
 
 
-Manifest
-========
+# Manifest
 
 The packager looks for a `manifest.yml` file in the current working
 directory, which should be the root of your buildpack.
 
 A sample manifest (all keys are required):
 
-```
-yaml
+```yaml
 ---
 language: ruby
 
@@ -115,20 +121,18 @@ exclude_files:
   - private.key
 ```
 
-language (required)
---------
+## language (required)
 
 The language key is used to give your zip file a meaningful name.
 
 
-url_to_dependency_map (required)
----------
+## url_to_dependency_map (required)
 
 A list of regular expressions that extract and map the values of `name` and `version` to a corresponding dependency. 
 
 
-dependencies (required)
-------------
+## dependencies (required)
+
 
 The dependencies key specifies the name, version, uri, md5, and the
 cf_stacks (the root file system(s) for which it is compiled for) of a
@@ -151,11 +155,10 @@ To have your buildpack use these 'cached' dependencies, use
 `compile_extensions/bin/translate_dependency_url` to translate the url
 into a locally cached url (useful for cached mode).
 
-Read more on the [compile-extensions repo](https://github.com/cf-buildpacks/compile-extensions/).
+Read more on the [compile-extensions repo](https://github.com/cloudfoundry-incubator/compile-extensions).
 
 
-exclude_files (required)
--------------
+## exclude_files (required)
 
 The exclude key lists files you do not want in your buildpack. This is
 useful to remove sensitive information before uploading.
