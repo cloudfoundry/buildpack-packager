@@ -4,26 +4,38 @@ require 'optparse'
 require 'buildpack/manifest_validator'
 
 SUPPORTED_MODES = %w{cached uncached list}
-USAGE_MSG = "USAGE: #{File.basename(__FILE__)} [options] < #{SUPPORTED_MODES.join(' | ')} >"
+USAGE_MSG       = "USAGE: #{File.basename(__FILE__)} < #{SUPPORTED_MODES.map {|mode| '--' + mode }.join(' | ')} >"
 
 options = {
-  root_dir:      Dir.pwd,
-  manifest_path: 'manifest.yml',
+  root_dir:       Dir.pwd,
+  manifest_path:  'manifest.yml',
   force_download: false
 }
 
 optparser = OptionParser.new do |opts|
   opts.banner = USAGE_MSG
 
-  opts.on("--force-download", "Force dependencies to be downloaded from the internet. (default is false)") do
+  opts.on('--cached', 'Package dependencies with the built buildpack.') do
+    options[:mode] = :cached
+  end
+
+  opts.on('--uncached', 'Will NOT package dependencies with the built buildpack.') do
+    options[:mode] = :uncached
+  end
+
+  opts.on('--list', 'List dependencies supported by the buildpack.') do
+    options[:mode] = :list
+  end
+
+  opts.on('--force-download', 'Force dependencies to be downloaded from the internet. (default is false)') do
     options[:force_download] = true 
   end
 
-  opts.on("--use-custom-manifest=PATH_TO_MANIFEST", "Use a custom manifest, passing the path as an argument.") do |manifest_path|
+  opts.on('--use-custom-manifest=PATH_TO_MANIFEST', 'Use a custom manifest, passing the path as an argument.') do |manifest_path|
     options[:manifest_path] = manifest_path
   end
 
-  opts.on_tail("-h", "--help", "Show this message") do
+  opts.on_tail('-h', '--help', 'Show this message') do
     puts opts
     exit
   end
@@ -31,11 +43,7 @@ end
 
 optparser.parse!
 
-mode = ARGV[0]
-if SUPPORTED_MODES.include?(mode)
-  options[:mode] = mode.to_sym
-else
-  puts "ERROR: Unknown mode '#{mode}'" if mode
+unless options[:mode]
   puts optparser
   exit 1
 end
@@ -52,7 +60,7 @@ unless validator.valid?
   exit 1
 end
 
-if mode == "list"
+if options[:mode] == :list
   puts Buildpack::Packager.list(options)
 else
   Buildpack::Packager.package(options)

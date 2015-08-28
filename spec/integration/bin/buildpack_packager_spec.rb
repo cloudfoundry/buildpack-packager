@@ -138,8 +138,8 @@ MANIFEST
     FileUtils.remove_entry tmp_dir
   end
 
-  describe 'list mode' do
-    let(:mode) { 'list' }
+  describe 'list flag' do
+    let(:flags) { '--list' }
 
     before do
       create_manifests
@@ -147,7 +147,7 @@ MANIFEST
 
     context 'default manifest' do
       it 'emits a table of contents' do
-        output = run_packager_binary(buildpack_dir, mode)
+        output = run_packager_binary(buildpack_dir, flags)
         stdout = output.first
 
         expect(stdout).to match(/fake_name.*1\.2/)
@@ -156,9 +156,9 @@ MANIFEST
     end
 
     context 'custom manifest' do
-      let(:flags) { '--use-custom-manifest=manifest-including-unsupported.yml' }
+      let(:flags) { '--list --use-custom-manifest=manifest-including-unsupported.yml' }
       it 'emits a table of contents' do
-        output = run_packager_binary(buildpack_dir, mode, flags)
+        output = run_packager_binary(buildpack_dir, flags)
         stdout = output.first
 
         expect(stdout).to match(/fake_name.*1\.1/)
@@ -170,17 +170,17 @@ MANIFEST
 
   describe 'flags' do
     describe '--use-custom-manifest' do
-      let(:mode) { 'uncached' }
+      let(:flags) { '--uncached' }
 
       before do
         create_manifests
       end
 
       context 'with the flag' do
-        let(:flags) { '--use-custom-manifest=manifest-including-unsupported.yml' }
+        let(:flags) { '--uncached --use-custom-manifest=manifest-including-unsupported.yml' }
 
         it 'uses the specified manifest' do
-          run_packager_binary(buildpack_dir, mode, flags)
+          run_packager_binary(buildpack_dir, flags)
 
           manifest_location = File.join(Dir.mktmpdir, 'manifest.yml')
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
@@ -198,7 +198,7 @@ MANIFEST
 
       context 'without the flag' do
         it 'uses the skinny manifest' do
-          run_packager_binary(buildpack_dir, mode)
+          run_packager_binary(buildpack_dir, flags)
 
           manifest_location = File.join(Dir.mktmpdir, 'manifest.yml')
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
@@ -217,10 +217,10 @@ MANIFEST
   end
 
   context 'without a manifest' do
-    let(:mode) { 'uncached' }
+    let(:flags) { '--uncached' }
 
     specify do
-      output, status = run_packager_binary(buildpack_dir, mode)
+      output, status = run_packager_binary(buildpack_dir, flags)
 
       expect(output).to include('Could not find manifest.yml')
       expect(status).not_to be_success
@@ -228,14 +228,14 @@ MANIFEST
   end
 
   context 'with an invalid manifest' do
-    let(:mode) { 'uncached' }
+    let(:flags) { '--uncached' }
 
     before do
       create_invalid_manifest
     end
 
     specify do
-      output, status = run_packager_binary(buildpack_dir, mode)
+      output, status = run_packager_binary(buildpack_dir, flags)
 
       expect(output).to include('parser_error')
       expect(status).not_to be_success
@@ -243,23 +243,23 @@ MANIFEST
   end
 
   describe 'usage' do
-    context 'without a mode parameter' do
-      let(:mode) { "" }
+    context 'without a flag' do
+      let(:flags) { "" }
       specify do
-        output, status = run_packager_binary(buildpack_dir, mode)
+        output, status = run_packager_binary(buildpack_dir, flags)
 
-        expect(output).to include("USAGE: buildpack-packager [options] < cached | uncached | list >")
+        expect(output).to include("USAGE: buildpack-packager [options] < --cached | --uncached | --list >")
         expect(status).not_to be_success
       end
     end
 
-    context 'with an invalid mode parameter' do
-      let(:mode) { 'beast' }
+    context 'with an invalid flag' do
+      let(:flags) { 'beast' }
 
       it 'reports proper usage' do
-        output, status = run_packager_binary(buildpack_dir, mode)
+        output, status = run_packager_binary(buildpack_dir, flags)
 
-        expect(output).to include("USAGE: buildpack-packager [options] < cached | uncached | list >")
+        expect(output).to include("USAGE: buildpack-packager [options] < --cached | --uncached | --list >")
         expect(status).not_to be_success
       end
     end
@@ -273,10 +273,10 @@ MANIFEST
     describe 'the zip file contents' do
 
       context 'an uncached buildpack' do
-        let(:mode) { 'uncached' }
+        let(:flags) { '--uncached' }
 
         specify do
-          output, status = run_packager_binary(buildpack_dir, mode)
+          output, status = run_packager_binary(buildpack_dir, flags)
 
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
@@ -287,10 +287,10 @@ MANIFEST
       end
 
       context 'an cached buildpack' do
-        let(:mode) { 'cached' }
+        let(:flags) { '--cached' }
 
         specify do
-          _, status = run_packager_binary(buildpack_dir, mode)
+          _, status = run_packager_binary(buildpack_dir, flags)
 
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-cached-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
@@ -311,7 +311,7 @@ MANIFEST
           let(:md5) { "InvalidMD5_123" }
 
           specify do
-            _, status = run_packager_binary(buildpack_dir, mode)
+            stdout, status = run_packager_binary(buildpack_dir, flags)
             expect(status).not_to be_success
           end
         end

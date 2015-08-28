@@ -45,7 +45,7 @@ describe 'reusing previously downloaded files' do
 
   context 'the file is not in the cache' do
     specify 'the file should be kept in a cache when it is downloaded' do
-      _, status = run_packager_binary(buildpack_dir, 'cached')
+      _, status = run_packager_binary(buildpack_dir, '--cached')
 
       expect(status).to be_success
       expect(File).to exist(uri_to_cache_path(upstream_file_uri))
@@ -56,18 +56,18 @@ describe 'reusing previously downloaded files' do
 
   context 'the file has been downloaded before' do
     specify 'the file in the cache should be used instead of downloading' do
-      run_packager_binary(buildpack_dir, 'cached')
+      run_packager_binary(buildpack_dir, '--cached')
 
       remove_upstream_file('sample_download.ignore_me') # taking this away means packager must use the cache
 
-      _, status = run_packager_binary(buildpack_dir, 'cached')
+      _, status = run_packager_binary(buildpack_dir, '--cached')
 
       expect(status).to be_success
     end
 
     context 'however the file has changed, and the manifest is updated to reflect the new md5' do
       before do
-        run_packager_binary(buildpack_dir, 'cached')
+        run_packager_binary(buildpack_dir, '--cached')
 
         create_upstream_file('sample_download.ignore_me', "sample_download updated text")
         new_md5 = get_md5_of_file(upstream_file_path)
@@ -77,7 +77,7 @@ describe 'reusing previously downloaded files' do
       end
 
       specify 'the cache should now contain the new upstream file' do
-        output, status = run_packager_binary(buildpack_dir, 'cached')
+        output, status = run_packager_binary(buildpack_dir, '--cached')
 
         expect(status).to be_success
         expect(File.read(uri_to_cache_path(upstream_file_uri))).to include("sample_download updated text")
