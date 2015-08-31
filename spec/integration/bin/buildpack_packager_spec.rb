@@ -248,7 +248,7 @@ MANIFEST
       specify do
         output, status = run_packager_binary(buildpack_dir, flags)
 
-        expect(output).to include("USAGE: buildpack-packager [options] < --cached | --uncached | --list >")
+        expect(output).to include("USAGE: buildpack-packager < --cached | --uncached | --list >")
         expect(status).not_to be_success
       end
     end
@@ -259,7 +259,7 @@ MANIFEST
       it 'reports proper usage' do
         output, status = run_packager_binary(buildpack_dir, flags)
 
-        expect(output).to include("USAGE: buildpack-packager [options] < --cached | --uncached | --list >")
+        expect(output).to include("USAGE: buildpack-packager < --cached | --uncached | --list >")
         expect(status).not_to be_success
       end
     end
