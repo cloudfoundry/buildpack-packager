@@ -25,6 +25,7 @@ dependencies:
     version: 1.2
     uri: file://#{file_location}
     md5: #{md5}
+    modules: ["one", "two", "three"]
     cf_stacks:
       - lucid64
       - cflinuxfs2
@@ -153,6 +154,16 @@ MANIFEST
         expect(stdout).to match(/fake_name.*1\.2/)
         expect(stdout).to match(/------/) # it's a table!
       end
+
+      context 'and there are modules' do
+        it 'emit a table for modules' do
+          output = run_packager_binary(buildpack_dir, flags)
+          stdout = output.first
+
+          expect(stdout).to match /modules/
+          expect(stdout).to match /one, three, two/
+        end
+      end
     end
 
     context 'custom manifest' do
@@ -164,6 +175,15 @@ MANIFEST
         expect(stdout).to match(/fake_name.*1\.1/)
         expect(stdout).to match(/fake_name.*1\.2/)
         expect(stdout).to match(/------/) # it's a table!
+      end
+
+      context 'and there are no modules' do
+        it 'ensures there is no modules column' do
+          output = run_packager_binary(buildpack_dir, flags)
+          stdout = output.first
+
+          expect(stdout).to_not match /modules/
+        end
       end
     end
   end
