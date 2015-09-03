@@ -33,6 +33,11 @@ mapping:
          "uri":
            type: str
            required:  yes
+         "modules":
+           type: seq
+           required:  no
+           sequence:
+             - type: str
          "md5":
            type: str
            required:  yes

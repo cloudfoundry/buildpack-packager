@@ -14,6 +14,12 @@ dependencies:
     cf_stacks:
       - lucid64
       - cflinuxfs2
+  - name: php
+    version: 5.4.3
+    uri: http://php.net/downloads/php5.4.3.tar.gz
+    md5: 68901bbf8a04e71e0b30aa19c3946b21
+    modules: ['amqp', 'snmp']
+    cf_stacks: ['cflinuxfs2']
 
 exclude_files:
   - .git/
