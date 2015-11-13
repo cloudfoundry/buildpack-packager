@@ -4,6 +4,7 @@ require 'fileutils'
 require 'tmpdir'
 require 'yaml'
 require 'shellwords'
+require 'buildpack/packager/zip_file_excluder'
 
 module Buildpack
   module Packager
@@ -103,13 +104,7 @@ module Buildpack
       end
 
       def zip_files(source_dir, zip_file_path, excluded_files)
-        exclude_list = excluded_files.map do |file|
-          if file.chars.last == '/'
-            "--exclude=#{file}* --exclude=*/#{file}*"
-          else
-            "--exclude=#{file} --exclude=*/#{file}"
-          end
-        end.join(' ')
+        exclude_list = Buildpack::Packager::ZipFileExcluder.new.generate_exclude_file_list excluded_files
         `cd #{source_dir} && zip -r #{zip_file_path} ./ #{exclude_list}`
       end
     end
