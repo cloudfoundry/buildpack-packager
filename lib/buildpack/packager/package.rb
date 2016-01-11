@@ -104,8 +104,11 @@ module Buildpack
       end
 
       def zip_files(source_dir, zip_file_path, excluded_files)
-        exclude_list = Buildpack::Packager::ZipFileExcluder.new.generate_exclude_file_list excluded_files
-        `cd #{source_dir} && zip -r #{zip_file_path} ./ #{exclude_list}`
+        excluder = ZipFileExcluder.new
+        manifest_exclusions = excluder.generate_manifest_exclusions excluded_files
+        gitfile_exclusions = excluder.generate_exclusions_from_git_files source_dir
+        all_exclusions = manifest_exclusions + ' ' + gitfile_exclusions
+        `cd #{source_dir} && zip -r #{zip_file_path} ./ #{all_exclusions}`
       end
     end
   end

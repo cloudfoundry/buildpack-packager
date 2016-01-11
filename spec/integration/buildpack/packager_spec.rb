@@ -62,10 +62,13 @@ module Buildpack
         'log.txt',
         'blog.txt',
         'blog/blog.txt',
-        '.gitignore'
+        '.gitignore',
+        '.gitmodules',
+        'lib/.git'
       ]
     }
 
+    let(:git_files) { ['.gitignore', '.gitmodules', 'lib/.git'] }
     let(:cached_file) { File.join(cache_dir, translated_file_location) }
 
     def create_manifest(options = {})
@@ -206,6 +209,7 @@ module Buildpack
     end
 
     describe 'the zip file contents' do
+
       context 'an uncached buildpack' do
         let(:buildpack_mode) { :uncached }
 
@@ -215,7 +219,7 @@ module Buildpack
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
 
-          expect(zip_contents).to match_array(buildpack_files)
+          expect(zip_contents).to match_array(buildpack_files - git_files)
         end
       end
 
@@ -230,7 +234,7 @@ module Buildpack
           zip_contents = get_zip_contents(zip_file_path)
           dependencies = ["dependencies/#{translated_file_location}"]
 
-          expect(zip_contents).to match_array(buildpack_files + dependencies)
+          expect(zip_contents).to match_array(buildpack_files + dependencies - git_files)
         end
       end
     end
@@ -239,7 +243,7 @@ module Buildpack
       let(:buildpack_mode) { :uncached }
 
       context 'when specifying files for exclusion' do
-        it 'excludes files from zip files' do
+        it 'excludes .git files from zip files' do
           create_manifest(exclude_files: ['.gitignore'])
           Packager.package(options)
 
@@ -247,6 +251,8 @@ module Buildpack
           zip_contents = get_zip_contents(zip_file_path)
 
           expect(zip_contents).to_not include('.gitignore')
+          expect(zip_contents).to_not include('.gitmodules')
+          expect(zip_contents).to_not include('lib/.git')
         end
       end
 
