@@ -170,9 +170,11 @@ useful to remove sensitive information before uploading.
 Latest changes to master will not be automatically reflected in the various Cloud Foundry buildpacks.
 To propagate buildpack-packager changes:
 
-1. Tag the new version with a release tag (e.g., `git tag v2.2.5`).
-2. Push the tag to origin with `git push --tags`.
-3. Update the `cf.Gemfile`s in the various buildpacks with the new release tag like so:
+1. Update the version in `lib/buildpack/packager/version.rb`.
+2. Commit this change and push to master.
+3. Tag the new version with a release tag (e.g., `git tag v2.2.6`).
+4. Push the tag to origin with `git push --tags`.
+5. Update the `cf.Gemfile`s in the various buildpacks with the new release tag like so:
 ```
-gem 'buildpack-packager', git: 'https://github.com/cloudfoundry/buildpack-packager', tag: 'v2.2.5'
+gem 'buildpack-packager', git: 'https://github.com/cloudfoundry/buildpack-packager', tag: 'v2.2.6'
 ```
