@@ -162,3 +162,17 @@ Read more on the [compile-extensions repo](https://github.com/cloudfoundry-incub
 
 The exclude key lists files you do not want in your buildpack. This is
 useful to remove sensitive information before uploading.
+
+# Development
+
+## Propagating Packager Changes to CF Buildpacks
+
+Latest changes to master will not be automatically reflected in the various Cloud Foundry buildpacks.
+To propagate buildpack-packager changes:
+
+1. Tag the new version with a release tag (e.g., `git tag v2.2.5`).
+2. Push the tag to origin with `git push --tags`.
+3. Update the `cf.Gemfile`s in the various buildpacks with the new release tag like so:
+```
+gem 'buildpack-packager', git: 'https://github.com/cloudfoundry/buildpack-packager', tag: 'v2.2.5'
+```
