@@ -346,7 +346,7 @@ module Buildpack
             it 'raises an error about a failed download' do
               expect {
                 Packager.package(options.merge(force_download: true))
-              }.to raise_error(RuntimeError)
+              }.to raise_error(RuntimeError, "Failed to download file from file://fake-file-that-no-one-should-have.txt")
             end
           end
 
@@ -367,7 +367,7 @@ module Buildpack
                 File.write(cached_file, 'asdf')
 
                 File.delete(file_location)
-                
+
                 expect {
                   Packager.package(options.merge(force_download: true))
                 }.to raise_error(RuntimeError)
