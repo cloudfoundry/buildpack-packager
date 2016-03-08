@@ -3,7 +3,6 @@ require 'buildpack/packager'
 
 module Buildpack
   describe Packager do
-
     let(:fake_file_uri) do
       location = File.join(Dir.mktmpdir, 'fake.file')
       File.write(location, 'fake text')
@@ -31,7 +30,7 @@ module Buildpack
 
     let(:root_dir) do
       dir_name = Dir.mktmpdir('fake-buildpack')
-      File.write(File.join(dir_name, 'mock.txt'), "fake!")
+      File.write(File.join(dir_name, 'mock.txt'), 'fake!')
       dir_name
     end
 
@@ -69,8 +68,8 @@ module Buildpack
           dir_name
         end
 
-        it "puts the zip file in the right place" do
-          expect(File.exists?(File.join(root_dir, 'fake_buildpack-v1.0.0.zip'))).to be(true)
+        it 'puts the zip file in the right place' do
+          expect(File.exist?(File.join(root_dir, 'fake_buildpack-v1.0.0.zip'))).to be(true)
         end
       end
 
@@ -81,8 +80,8 @@ module Buildpack
           dir_name
         end
 
-        it "it puts the zip file in the right place" do
-          expect(File.exists?(File.join(root_dir, 'fake_buildpack-v1.0.0.zip'))).to be(true)
+        it 'it puts the zip file in the right place' do
+          expect(File.exist?(File.join(root_dir, 'fake_buildpack-v1.0.0.zip'))).to be(true)
         end
       end
     end

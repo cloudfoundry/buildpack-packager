@@ -6,7 +6,7 @@ describe Buildpack::ManifestValidator do
   let(:validator) { Buildpack::ManifestValidator.new(manifest_path) }
 
   context 'with a valid manifest' do
-    let(:manifest_file_name) { "manifest_valid.yml" }
+    let(:manifest_file_name) { 'manifest_valid.yml' }
 
     it 'reports valid manifests correctly' do
       expect(validator.valid?).to be(true)
@@ -15,7 +15,7 @@ describe Buildpack::ManifestValidator do
   end
 
   context 'with a manifest with an invalid md5 key' do
-    let(:manifest_file_name) { "manifest_invalid-md6.yml" }
+    let(:manifest_file_name) { 'manifest_invalid-md6.yml' }
 
     it 'reports invalid manifests correctly' do
       expect(validator.valid?).to be(false)

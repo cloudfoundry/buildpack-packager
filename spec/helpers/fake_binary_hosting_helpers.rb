@@ -1,5 +1,4 @@
 module FakeBinaryHostingHelpers
-
   def upstream_host_dir
     @upstream_host_dir ||= Dir.mktmpdir('upstream_host_')
   end
@@ -15,6 +14,7 @@ module FakeBinaryHostingHelpers
   end
 
   private
+
   def generate_upstream_file_path(file_name)
     File.join(upstream_host_dir, file_name)
   end

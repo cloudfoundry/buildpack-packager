@@ -19,24 +19,24 @@ module Buildpack
 
     let(:md5) { Digest::MD5.file(file_location).hexdigest }
 
-    let(:options) {
+    let(:options) do
       {
         root_dir: buildpack_dir,
         mode: buildpack_mode,
         cache_dir: cache_dir,
         manifest_path: manifest_path
       }
-    }
+    end
 
     let(:manifest_path) { 'manifest.yml' }
-    let(:manifest) {
+    let(:manifest) do
       {
         exclude_files: [],
         language: 'sample',
         url_to_dependency_map: [{
-          match: "ruby-(\d+\.\d+\.\d+)",
-          name: "ruby",
-          version: "$1",
+          match: 'ruby-(d+.d+.d+)',
+          name: 'ruby',
+          version: '$1'
         }],
         dependencies: [{
           'version' => '1.0',
@@ -46,9 +46,9 @@ module Buildpack
           'cf_stacks' => ['cflinuxfs2']
         }]
       }
-    }
+    end
 
-    let(:buildpack_files) {
+    let(:buildpack_files) do
       [
         'VERSION',
         'README.md',
@@ -63,7 +63,7 @@ module Buildpack
         '.gitmodules',
         'lib/.git'
       ]
-    }
+    end
 
     let(:git_files) { ['.gitignore', '.gitmodules', 'lib/.git'] }
     let(:cached_file) { File.join(cache_dir, translated_file_location) }
@@ -91,7 +91,7 @@ module Buildpack
     describe '#list' do
       let(:buildpack_mode) { :list }
 
-      context "default manifest.yml" do
+      context 'default manifest.yml' do
         specify do
           create_manifest
           table = Packager.list(options)
@@ -99,7 +99,7 @@ module Buildpack
         end
       end
 
-      context "alternate manifest path" do
+      context 'alternate manifest path' do
         let(:manifest_path) { 'my-manifest.yml' }
 
         specify do
@@ -110,26 +110,24 @@ module Buildpack
       end
 
       context 'sorted output' do
-        def create_manifest_dependency_skeleton dependencies
+        def create_manifest_dependency_skeleton(dependencies)
           manifest = {}
           manifest['dependencies'] = []
           dependencies.each do |dependency|
-            manifest['dependencies'].push({
-                'name'      => dependency.first,
-                'version'   => dependency.last,
-                'cf_stacks' => ['cflinuxfs2']
-              })
+            manifest['dependencies'].push('name' => dependency.first,
+                                          'version'   => dependency.last,
+                                          'cf_stacks' => ['cflinuxfs2'])
           end
           File.write(File.join(buildpack_dir, manifest_path), manifest.to_yaml)
         end
 
-        %w[go hhvm jruby node php python ruby].each do |interpreter|
+        %w(go hhvm jruby node php python ruby).each do |interpreter|
           it "sorts #{interpreter} interpreter first" do
             create_manifest_dependency_skeleton([
-                ["aaaaa", "1.0"],
-                [interpreter, "1.0"],
-                ["zzzzz", "1.0"]
-              ])
+                                                  ['aaaaa', '1.0'],
+                                                  [interpreter, '1.0'],
+                                                  ['zzzzz', '1.0']
+                                                ])
             table = Packager.list(options)
             stdout = table.to_s.split("\n")
 
@@ -144,10 +142,10 @@ module Buildpack
 
         it 'sorts using `name` as secondary key' do
           create_manifest_dependency_skeleton([
-              ["b_foobar", "1.0"],
-              ["a_foobar", "1.0"],
-              ["c_foobar", "1.0"]
-            ])
+                                                ['b_foobar', '1.0'],
+                                                ['a_foobar', '1.0'],
+                                                ['c_foobar', '1.0']
+                                              ])
           table = Packager.list(options)
           stdout = table.to_s.split("\n")
 
@@ -161,10 +159,10 @@ module Buildpack
 
         it 'sorts using `version` as secondary key' do
           create_manifest_dependency_skeleton([
-              ["foobar", "1.1"],
-              ["foobar", "1.2"],
-              ["foobar", "1.0"]
-            ])
+                                                ['foobar', '1.1'],
+                                                ['foobar', '1.2'],
+                                                ['foobar', '1.0']
+                                              ])
           table = Packager.list(options)
           stdout = table.to_s.split("\n")
 
@@ -175,9 +173,7 @@ module Buildpack
           expect(position_of_10).to be < position_of_11
           expect(position_of_11).to be < position_of_12
         end
-
       end
-
     end
 
     describe 'a well formed zip file name' do
@@ -201,12 +197,10 @@ module Buildpack
 
           expect(all_files(buildpack_dir)).to include('sample_buildpack-cached-v1.2.3.zip')
         end
-
       end
     end
 
     describe 'the zip file contents' do
-
       context 'an uncached buildpack' do
         let(:buildpack_mode) { :uncached }
 
@@ -225,7 +219,6 @@ module Buildpack
 
         specify do
           Packager.package(options)
-
 
           zip_file_path = File.join(buildpack_dir, 'sample_buildpack-cached-v1.2.3.zip')
           zip_contents = get_zip_contents(zip_file_path)
@@ -336,17 +329,17 @@ module Buildpack
             it 'does not cache the file' do
               expect(File).to_not exist(cached_file)
 
-              expect {
+              expect do
                 Packager.package(options.merge(force_download: true))
-              }.to raise_error(RuntimeError)
+              end.to raise_error(RuntimeError)
 
               expect(File).to_not exist(cached_file)
             end
 
             it 'raises an error about a failed download' do
-              expect {
+              expect do
                 Packager.package(options.merge(force_download: true))
-              }.to raise_error(RuntimeError, "Failed to download file from file://fake-file-that-no-one-should-have.txt")
+              end.to raise_error(RuntimeError, 'Failed to download file from file://fake-file-that-no-one-should-have.txt')
             end
           end
 
@@ -368,9 +361,9 @@ module Buildpack
 
                 File.delete(file_location)
 
-                expect {
+                expect do
                   Packager.package(options.merge(force_download: true))
-                }.to raise_error(RuntimeError)
+                end.to raise_error(RuntimeError)
 
                 expect(File.read(cached_file)).to eq 'asdf'
               end
@@ -435,9 +428,9 @@ module Buildpack
 
       context 'zip is not installed' do
         before do
-          allow(Open3).to receive(:capture3).
-            with("which zip").
-            and_return(['', '', 'exit 1'])
+          allow(Open3).to receive(:capture3)
+            .with('which zip')
+            .and_return(['', '', 'exit 1'])
         end
 
         specify do
@@ -453,7 +446,7 @@ module Buildpack
         specify 'user does not see dependencies directory in their buildpack folder' do
           Packager.package(options)
 
-          expect(all_files(buildpack_dir)).not_to include("dependencies")
+          expect(all_files(buildpack_dir)).not_to include('dependencies')
         end
       end
     end

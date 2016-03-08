@@ -4,14 +4,13 @@ require 'tmpdir'
 module Buildpack
   module Packager
     describe Package do
-
       let(:packager) { Buildpack::Packager::Package.new(options) }
       let(:manifest_path) { 'manifest.yml' }
       let(:dependency) { double(:dependency) }
       let(:mode) { :uncached }
       let(:local_cache_dir) { nil }
       let(:force_download) { false }
-      let(:options) {
+      let(:options) do
         {
           root_dir: 'root_dir',
           mode: mode,
@@ -19,15 +18,15 @@ module Buildpack
           manifest_path: manifest_path,
           force_download: force_download
         }
-      }
+      end
 
-      let(:manifest) {
+      let(:manifest) do
         {
           language: 'fake_language',
           dependencies: [dependency],
           exclude_files: ['.DS_Store', '.gitignore']
         }
-      }
+      end
 
       before do
         allow(YAML).to receive(:load_file).and_return(manifest)
@@ -153,7 +152,6 @@ module Buildpack
           allow(packager).to receive(:zip_files)
           allow(packager).to receive(:zip_file_path)
             .and_return(File.join('root_dir', 'fake_language_buildpack-v1.0.0.zip'))
-
         end
 
         it 'removes the file at the zip file path' do

@@ -20,9 +20,7 @@ module Buildpack
       Dir.mktmpdir do |temp_dir|
         package.copy_buildpack_to_temp_dir(temp_dir)
 
-        if options[:mode] == :cached
-          package.build_dependencies(temp_dir)
-        end
+        package.build_dependencies(temp_dir) if options[:mode] == :cached
 
         package.build_zip_file(temp_dir)
       end
@@ -36,10 +34,10 @@ module Buildpack
     end
 
     def self.check_for_zip
-      _, _, status = Open3.capture3("which zip")
+      _, _, status = Open3.capture3('which zip')
 
-      if status.to_s.include?("exit 1")
-        raise RuntimeError, "Zip is not installed\nTry: apt-get install zip\nAnd then rerun"
+      if status.to_s.include?('exit 1')
+        raise "Zip is not installed\nTry: apt-get install zip\nAnd then rerun"
       end
     end
   end

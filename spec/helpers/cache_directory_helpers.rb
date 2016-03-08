@@ -1,5 +1,4 @@
 module CacheDirectoryHelpers
-
   BUILDPACK_PACKAGER_CACHE_DIR = File.join(ENV['HOME'], '.buildpack-packager', 'cache')
 
   def uri_to_cache_filename(uri)

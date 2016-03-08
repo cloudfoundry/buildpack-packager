@@ -7,9 +7,8 @@ module Buildpack
     class ManifestValidationError < StandardError; end
 
     SCHEMA_FILE = File.join(File.dirname(__FILE__), 'packager', 'manifest_schema.yml')
-    
-    attr_reader :errors
 
+    attr_reader :errors
 
     def initialize(manifest_path)
       @manifest_path = manifest_path
@@ -19,7 +18,6 @@ module Buildpack
       validate
       errors.empty?
     end
-
 
     private
 

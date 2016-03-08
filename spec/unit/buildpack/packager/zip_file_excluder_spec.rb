@@ -6,7 +6,7 @@ require 'securerandom'
 module Buildpack
   module Packager
     describe ZipFileExcluder do
-      describe "#generate_exclusions_from_manifest" do
+      describe '#generate_exclusions_from_manifest' do
         let(:excluder) { ZipFileExcluder.new }
         let(:file1) { SecureRandom.uuid }
         let(:file2) { SecureRandom.uuid }
@@ -29,15 +29,14 @@ module Buildpack
           end
         end
 
-        it "uses short flags to support zip 2.3.*, see [#107948062]" do
-          is_expected.to include("-x")
-          is_expected.to_not include("--exclude")
+        it 'uses short flags to support zip 2.3.*, see [#107948062]' do
+          is_expected.to include('-x')
+          is_expected.to_not include('--exclude')
         end
       end
     end
 
-    describe "#generate_exclusions_from_git_files" do
-
+    describe '#generate_exclusions_from_git_files' do
       let(:excluder) { ZipFileExcluder.new }
 
       context 'git files exist' do
@@ -45,14 +44,13 @@ module Buildpack
 
         it 'returns an exclusion string with all the git files' do
           Dir.mktmpdir do |dir|
-
             Dir.mkdir "#{dir}/lib"
 
             files.each do |gitfilename|
-              if gitfilename.match(/.*\/$/)
+              if gitfilename =~ /.*\/$/
                 Dir.mkdir "#{dir}/#{gitfilename}"
               else
-                File.new "#{dir}/#{gitfilename}", "w"
+                File.new "#{dir}/#{gitfilename}", 'w'
               end
             end
 
@@ -66,6 +64,5 @@ module Buildpack
         end
       end
     end
-
   end
 end

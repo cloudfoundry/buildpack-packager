@@ -99,27 +99,27 @@ MANIFEST
   let(:deprecated_file_location) { "#{remote_dependencies_dir}/dep2.txt" }
   let(:deprecated_md5) { Digest::MD5.file(deprecated_file_location).hexdigest }
 
-  let(:files_to_include) {
+  let(:files_to_include) do
     [
       'VERSION',
       'README.md',
       'lib/sai.to',
       'lib/rash'
     ]
-  }
+  end
 
-  let(:files_to_exclude) {
+  let(:files_to_exclude) do
     [
       '.gitignore',
       'lib/ephemeral_junkpile'
     ]
-  }
+  end
 
   let(:files) { files_to_include + files_to_exclude }
 
-  let(:dependencies) {
+  let(:dependencies) do
     ['dep1.txt', 'dep2.txt']
-  }
+  end
 
   before do
     make_fake_files(
@@ -264,11 +264,11 @@ MANIFEST
 
   describe 'usage' do
     context 'without a flag' do
-      let(:flags) { "" }
+      let(:flags) { '' }
       specify do
         output, status = run_packager_binary(buildpack_dir, flags)
 
-        expect(output).to include("USAGE: buildpack-packager < --cached | --uncached | --list >")
+        expect(output).to include('USAGE: buildpack-packager < --cached | --uncached | --list >')
         expect(status).not_to be_success
       end
     end
@@ -279,7 +279,7 @@ MANIFEST
       it 'reports proper usage' do
         output, status = run_packager_binary(buildpack_dir, flags)
 
-        expect(output).to include("USAGE: buildpack-packager < --cached | --uncached | --list >")
+        expect(output).to include('USAGE: buildpack-packager < --cached | --uncached | --list >')
         expect(status).not_to be_success
       end
     end
@@ -291,7 +291,6 @@ MANIFEST
     end
 
     describe 'the zip file contents' do
-
       context 'an uncached buildpack' do
         let(:flags) { '--uncached' }
 
@@ -317,18 +316,18 @@ MANIFEST
 
           dependencies_in_manifest = YAML.load_file(File.join(buildpack_dir, 'manifest.yml'))['dependencies']
 
-          dependencies_with_translation = dependencies_in_manifest.
-            map { |dep| "file://#{remote_dependencies_dir}/#{dep['uri'].split('/').last}" }.
-            map { |path| path.gsub(/[:\/]/, '_') }
+          dependencies_with_translation = dependencies_in_manifest
+                                          .map { |dep| "file://#{remote_dependencies_dir}/#{dep['uri'].split('/').last}" }
+                                          .map { |path| path.gsub(/[:\/]/, '_') }
 
-            deps_with_path = dependencies_with_translation.map { |dep| "dependencies/#{dep}" }
+          deps_with_path = dependencies_with_translation.map { |dep| "dependencies/#{dep}" }
 
-            expect(zip_contents).to match_array(files_to_include + deps_with_path)
-            expect(status).to be_success
+          expect(zip_contents).to match_array(files_to_include + deps_with_path)
+          expect(status).to be_success
         end
 
         context 'vendored dependencies with invalid checksums' do
-          let(:md5) { "InvalidMD5_123" }
+          let(:md5) { 'InvalidMD5_123' }
 
           specify do
             stdout, status = run_packager_binary(buildpack_dir, flags)
