@@ -13,9 +13,6 @@ module Buildpack
     let(:file_location) do
       location = File.join(tmp_dir, 'sample_host')
       File.write(location, 'contents!')
-      puts "FILE CONTENTS--------------------"
-      puts location
-      puts `cat #{location}`
       location
     end
     let(:translated_file_location) { 'file___' + file_location.gsub(/[:\/]/, '_') }
@@ -322,18 +319,61 @@ module Buildpack
 
         context 'with the force download enabled' do
           context 'and the cached file does not exist' do
-            it 'will write the cache file' do
+            it 'will overwrite the cache file' do
+              expect(File).to_not exist(cached_file)
+
               Packager.package(options.merge(force_download: true))
+
               expect(File).to exist(cached_file)
+              expect(Digest::MD5.file(cached_file).hexdigest).to eq md5
+            end
+          end
+
+          context 'and the request fails' do
+            let(:file_location) { 'fake-file-that-no-one-should-have.txt' }
+            let(:md5) { nil }
+
+            it 'does not cache the file' do
+              expect(File).to_not exist(cached_file)
+
+              expect {
+                Packager.package(options.merge(force_download: true))
+              }.to raise_error(RuntimeError)
+
+              expect(File).to_not exist(cached_file)
+            end
+
+            it 'raises an error about a failed download' do
+              expect {
+                Packager.package(options.merge(force_download: true))
+              }.to raise_error(RuntimeError)
             end
           end
 
           context 'on subsequent calls' do
-            it 'does not use the cached file' do
-              Packager.package(options.merge(force_download: true))
-              File.write(cached_file, 'asdf')
-              Packager.package(options.merge(force_download: true))
-              expect(File.read(cached_file)).to_not eq 'asdf'
+            context 'and they are successful' do
+              it 'does not use the cached file and overwrites it' do
+                Packager.package(options.merge(force_download: true))
+                File.write(cached_file, 'asdf')
+
+                Packager.package(options.merge(force_download: true))
+                expect(Digest::MD5.file(cached_file).hexdigest).to eq md5
+              end
+            end
+
+            context 'and they fail' do
+              it 'does not override the cached file' do
+                Packager.package(options.merge(force_download: true))
+                File.write(cached_file, 'asdf')
+
+                File.delete(file_location)
+                
+                expect {
+                  Packager.package(options.merge(force_download: true))
+                }.to raise_error(RuntimeError)
+
+                expect(File.read(cached_file)).to eq 'asdf'
+              end
             end
           end
         end

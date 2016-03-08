@@ -100,7 +100,8 @@ module Buildpack
       end
 
       def download_file(url, file)
-        `curl #{url} -o #{file} -L --fail -f`
+        result = system("curl #{url} -o #{file} -L --fail -f")
+        raise "Failed to Download" unless result
       end
 
       def zip_files(source_dir, zip_file_path, excluded_files)
