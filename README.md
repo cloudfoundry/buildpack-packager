@@ -2,7 +2,7 @@
 
 A [RubyGem](https://rubygems.org/) that provides tooling to package a buildpack for upload to Cloud Foundry.
 
-For officially supported Cloud Foundry buildpacks, it used in conjunction with [compile-extensions](https://github.com/cloudfoundry-incubator/compile-extensions).
+For officially supported Cloud Foundry buildpacks, it is used in conjunction with [compile-extensions](https://github.com/cloudfoundry-incubator/compile-extensions).
 
 
 # Usage
