@@ -161,7 +161,7 @@ Read more on the [compile-extensions repo](https://github.com/cloudfoundry-incub
 ## exclude_files (required)
 
 The exclude key lists files you do not want in your buildpack. This is
-useful to remove sensitive information before uploading.
+useful to remove sensitive information or extraneous files before uploading.
 
 # Development
 
