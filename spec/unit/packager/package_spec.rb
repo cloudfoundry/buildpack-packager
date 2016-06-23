@@ -90,6 +90,7 @@ module Buildpack
         let(:dependency_dir) { File.join('hello_dir', 'dependencies') }
 
         before do
+          allow(dependency).to receive(:[])
           allow(dependency).to receive(:[]).with('uri').and_return('file:///fake_uri.tgz')
           allow(packager).to receive(:ensure_correct_dependency_checksum)
           allow(FileUtils).to receive(:cp)

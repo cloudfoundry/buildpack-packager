@@ -29,11 +29,14 @@ module Buildpack
           translated_filename = uri_cache_path(dependency['uri'])
           local_cached_file = File.expand_path(File.join(local_cache_directory, translated_filename))
 
-          from_local_cache = true
           if options[:force_download] || !File.exist?(local_cached_file)
+	    puts "Downloading #{dependency['name']} version #{dependency['version']} from: #{dependency['uri']}"
             download_file(dependency['uri'], local_cached_file)
             from_local_cache = false
-          end
+          else
+	    puts "Used #{dependency['name']} version #{dependency['version']} from local cache at: #{local_cached_file}"
+            from_local_cache = true
+	  end
 
           ensure_correct_dependency_checksum({
             local_cached_file: local_cached_file,
