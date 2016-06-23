@@ -1,0 +1,54 @@
+---
+language: go
+url_to_dependency_map:
+- match: go(\d+\.\d+(.*))
+  name: go
+  version: "$1"
+- match: godep
+  name: godep
+  version: v74
+dependencies:
+- name: go
+  version: 1.5.3
+  uri: https://storage.googleapis.com/golang/go1.5.3.linux-amd64.tar.gz
+  md5: 31717324cabc5f8c537deee00a5a2b3c
+  cf_stacks:
+  - cflinuxfs2
+- name: go
+  version: 1.5.4
+  uri: https://storage.googleapis.com/golang/go1.5.4.linux-amd64.tar.gz
+  md5: 27b1c469797292064c65c995ffe30386
+  cf_stacks:
+  - cflinuxfs2
+- name: go
+  version: 1.6.1
+  uri: https://storage.googleapis.com/golang/go1.6.1.linux-amd64.tar.gz
+  md5: e277d18dac8a0b9945d4c53adf6e52ee
+  cf_stacks:
+  - cflinuxfs2
+- name: go
+  version: 1.6.2
+  uri: https://storage.googleapis.com/golang/go1.6.2.linux-amd64.tar.gz
+  md5: ebfb8b38330c8779b121c43433c4b9be
+  cf_stacks:
+  - cflinuxfs2
+- name: godep
+  version: v74
+  uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/godep/godep-v74-linux-x64.tgz
+  md5: 70220eee9f9e654e0b85887f696b6add
+  cf_stacks:
+  - cflinuxfs2
+exclude_files:
+- ".git/"
+- ".gitignore"
+- ".gitmodules"
+- cf_spec/
+- log/
+- bin/package
+- buildpack-packager/
+- test-godir/
+- test/
+- Makefile
+- PULL_REQUEST_TEMPLATE
+- ISSUE_TEMPLATE
+- go_buildpack-*v*.zip

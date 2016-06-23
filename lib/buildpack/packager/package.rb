@@ -54,6 +54,10 @@ module Buildpack
         DependenciesPresenter.new(manifest['dependencies']).to_markdown
       end
 
+      def zip_file_path
+        Shellwords.escape(File.join(options[:root_dir], zip_file_name))
+      end
+
       private
 
       def uri_cache_path uri
@@ -62,10 +66,6 @@ module Buildpack
 
       def manifest
         @manifest ||= YAML.load_file(options[:manifest_path]).with_indifferent_access
-      end
-
-      def zip_file_path
-        Shellwords.escape(File.join(options[:root_dir], zip_file_name))
       end
 
       def zip_file_name

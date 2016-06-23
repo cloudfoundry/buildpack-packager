@@ -25,6 +25,9 @@ module Buildpack
         package.build_zip_file(temp_dir)
       end
 
+      buildpack_type = options[:mode] == :cached ? "Cached" : "Uncached"
+      puts "#{buildpack_type} buildpack created and saved as #{package.zip_file_path}"
+
       package
     end
 
