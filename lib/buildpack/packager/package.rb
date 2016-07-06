@@ -64,7 +64,7 @@ module Buildpack
       private
 
       def uri_cache_path uri
-        uri.gsub(/[:\/]/, '_')
+        uri.gsub(/[:\/\?&]/, '_')
       end
 
       def manifest

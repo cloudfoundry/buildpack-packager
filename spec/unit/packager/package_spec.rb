@@ -88,6 +88,7 @@ module Buildpack
       describe '#download_dependencies' do
         let(:local_cache_dir) { 'local_cache_dir' }
         let(:dependency_dir) { File.join('hello_dir', 'dependencies') }
+        let(:url_with_parameters) { 'http://some.cdn/with?parameters=true&secondParameter=present' }
 
         before do
           allow(dependency).to receive(:[])
@@ -143,6 +144,11 @@ module Buildpack
             expect(packager).to receive(:download_file)
             packager.download_dependencies([dependency], local_cache_dir, dependency_dir)
           end
+        end
+
+        it 'translates ? and & characters in the url to underscores' do
+          package = Package.new
+          expect(package.send(:uri_cache_path, url_with_parameters)).to eq("http___some.cdn_with_parameters=true_secondParameter=present")
         end
       end
 
