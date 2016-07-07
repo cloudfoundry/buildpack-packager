@@ -6,11 +6,11 @@ require 'buildpack/packager/version'
 Gem::Specification.new do |spec|
   spec.name          = 'buildpack-packager'
   spec.version       = Buildpack::Packager::VERSION
-  spec.authors       = ['Rasheed Abdul-Aziz and Sai To Yeung']
-  spec.email         = ['pair+squeedee+syeung@pivotal.io']
+  spec.authors       = ['Cloud Foundry Buildpacks Team']
+  spec.email         = ['cf-buildpacks-eng@pivotal.io']
   spec.summary       = 'Tool that packages your buildpacks based on a manifest'
   spec.description   = 'Tool that packages your buildpacks based on a manifest'
-  spec.homepage      = ''
+  spec.homepage      = 'https://github.com/cloudfoundry/buildpack-packager'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0")
