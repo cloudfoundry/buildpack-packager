@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary       = 'Tool that packages your buildpacks based on a manifest'
   spec.description   = 'Tool that packages your buildpacks based on a manifest'
   spec.homepage      = 'https://github.com/cloudfoundry/buildpack-packager'
-  spec.license       = 'MIT'
+  spec.license       = 'Apache 2.0'
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
