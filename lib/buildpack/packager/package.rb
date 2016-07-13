@@ -32,9 +32,13 @@ module Buildpack
           if options[:force_download] || !File.exist?(local_cached_file)
 	    puts "Downloading #{dependency['name']} version #{dependency['version']} from: #{dependency['uri']}"
             download_file(dependency['uri'], local_cached_file)
+            human_readable_size = `du -h #{local_cached_file} | cut -f1`.strip
+            puts "Using #{dependency['name']} version #{dependency['version']} with size #{human_readable_size}"
+
             from_local_cache = false
           else
-	    puts "Used #{dependency['name']} version #{dependency['version']} from local cache at: #{local_cached_file}"
+            human_readable_size = `du -h #{local_cached_file} | cut -f1`.strip
+            puts "Using #{dependency['name']} version #{dependency['version']} from local cache at: #{local_cached_file} with size #{human_readable_size}"
             from_local_cache = true
 	  end
 
