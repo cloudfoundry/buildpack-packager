@@ -22,9 +22,10 @@ describe 'Buildpack packager output' do
   subject { buildpack_packager_execute(buildpack_fixture) }
 
   context 'building the uncached buildpack' do
-    it 'outputs the type of buildpack created and where' do
+    it 'outputs the type of buildpack created, where and its human readable size' do
       expect(subject).to include("Uncached buildpack created and saved as")
       expect(subject).to include("spec/fixtures/buildpack/go_buildpack-v1.7.8.zip")
+      expect(subject).to match(/of size 4\.0K$/)
     end
   end
 
@@ -37,9 +38,10 @@ describe 'Buildpack packager output' do
       expect(subject).to include("Downloading godep version v74 from: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/godep/godep-v74-linux-x64.tgz")
     end
 
-    it 'outputs the type of buildpack created and where' do
+    it 'outputs the type of buildpack created, where and its human readable size' do
       expect(subject).to include("Cached buildpack created and saved as")
       expect(subject).to include("spec/fixtures/buildpack/go_buildpack-cached-v1.7.8.zip")
+      expect(subject).to match(/of size 164M$/)
     end
 
     context 'with a buildpack packager dependency cache intact' do

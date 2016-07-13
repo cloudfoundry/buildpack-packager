@@ -26,7 +26,8 @@ module Buildpack
       end
 
       buildpack_type = options[:mode] == :cached ? "Cached" : "Uncached"
-      puts "#{buildpack_type} buildpack created and saved as #{package.zip_file_path}"
+      human_readable_size = `du -h #{package.zip_file_path} | cut -f1`
+      puts "#{buildpack_type} buildpack created and saved as #{package.zip_file_path} of size #{human_readable_size.strip}"
 
       package
     end
