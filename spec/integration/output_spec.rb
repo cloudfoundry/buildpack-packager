@@ -9,7 +9,7 @@ describe 'Buildpack packager output' do
     home = ENV['HOME']
     if home
       buildpack_packager_cache = File.join(home, '.buildpack-packager')
-      FileUtils.rm_rf(buildpack_packager_cache) 
+      FileUtils.rm_rf(buildpack_packager_cache)
     end
   end
 
@@ -21,14 +21,14 @@ describe 'Buildpack packager output' do
 
   subject { buildpack_packager_execute(buildpack_fixture) }
 
-  context 'building the cached buildpack' do
+  context 'building the uncached buildpack' do
     it 'outputs the type of buildpack created and where' do
       expect(subject).to include("Uncached buildpack created and saved as")
       expect(subject).to include("spec/fixtures/buildpack/go_buildpack-v1.7.8.zip")
     end
   end
 
-  context 'building the uncached buildpack' do
+  context 'building the cached buildpack' do
     let(:buildpack_type) { '--cached' }
 
     it 'outputs the dependencies downloaded, their versions, and download source url' do
