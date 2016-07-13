@@ -103,6 +103,8 @@ module Buildpack
             raise CheckSumError,
               "File: #{dependency['name']}, version: #{dependency['version']} downloaded at location #{dependency['uri']}\n\tis reporting a different checksum than the one specified in the manifest."
           end
+        else
+          puts "#{dependency['name']} version #{dependency['version']} matches the manifest provided md5 checksum of #{dependency['md5']}"
         end
       end
 
