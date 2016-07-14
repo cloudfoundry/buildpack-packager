@@ -33,7 +33,7 @@ module Buildpack
 	    puts "Downloading #{dependency['name']} version #{dependency['version']} from: #{dependency['uri']}"
             download_file(dependency['uri'], local_cached_file)
             human_readable_size = `du -h #{local_cached_file} | cut -f1`.strip
-            puts "Using #{dependency['name']} version #{dependency['version']} with size #{human_readable_size}"
+            puts "  Using #{dependency['name']} version #{dependency['version']} with size #{human_readable_size}"
 
             from_local_cache = false
           else
@@ -104,7 +104,7 @@ module Buildpack
               "File: #{dependency['name']}, version: #{dependency['version']} downloaded at location #{dependency['uri']}\n\tis reporting a different checksum than the one specified in the manifest."
           end
         else
-          puts "#{dependency['name']} version #{dependency['version']} matches the manifest provided md5 checksum of #{dependency['md5']}"
+          puts "  #{dependency['name']} version #{dependency['version']} matches the manifest provided md5 checksum of #{dependency['md5']}\n\n"
         end
       end
 
