@@ -52,3 +52,16 @@ mapping:
     required:  yes
     sequence:
       - type: str
+  "default_versions":
+    type: seq
+    required: no
+    sequence:
+      - type: map
+        required: yes
+        mapping:
+         "name":
+           type: str
+           required:  yes
+         "version":
+           type: text
+           required:  yes
