@@ -265,7 +265,7 @@ MANIFEST
     specify do
       output, status = run_packager_binary(buildpack_dir, flags)
 
-      expect(output).to include('parser_error')
+      expect(output).to include('conform to the schema')
       expect(output).to include('default_versions')
       expect(status).not_to be_success
     end

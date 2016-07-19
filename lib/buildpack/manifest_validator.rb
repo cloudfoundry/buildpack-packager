@@ -73,7 +73,7 @@ module Buildpack
       unmatched_dependencies.map do |dependency|
         name_version = "#{dependency.name} #{dependency.version}"
 
-        "a 'default_versions' entry for #{name_version} was specified by the buildpack manifest, " +
+        "- a 'default_versions' entry for #{name_version} was specified by the buildpack manifest, " +
           "but no 'dependencies' entry for #{name_version} was found in the buildpack manifest."
       end
     end

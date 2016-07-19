@@ -56,7 +56,13 @@ end
 
 validator = Buildpack::ManifestValidator.new(manifest_path)
 unless validator.valid?
-  STDERR.puts validator.errors
+  errors = validator.errors
+  if errors[:manifest_parser_errors]
+    STDERR.print "The manifest does not conform to the schema:\n\t- "
+    STDERR.puts errors[:manifest_parser_errors].join("\n\t- ")
+  end
+
+  STDERR.puts errors[:default_version].join("\n\t")
   exit 1
 end
 
