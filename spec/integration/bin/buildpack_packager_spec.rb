@@ -50,6 +50,10 @@ url_to_dependency_map:
     name: fake_name
     version: $1
 
+default_versions:
+  - name: fake_name
+    version: 1.2
+
 dependencies:
   - name: fake_name
     version: 1.2
@@ -80,6 +84,10 @@ MANIFEST
       manifest_file.write <<-MANIFEST
 ---
 language: sample
+
+default_versions:
+  - name: fake_name
+    version: 1.1.1.1.1.1
 
 dependencies:
   - name: fake_name
@@ -258,6 +266,7 @@ MANIFEST
       output, status = run_packager_binary(buildpack_dir, flags)
 
       expect(output).to include('parser_error')
+      expect(output).to include('default_versions')
       expect(status).not_to be_success
     end
   end
