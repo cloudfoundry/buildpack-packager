@@ -19,7 +19,17 @@ describe Buildpack::ManifestValidator do
 
     it 'reports invalid manifests correctly' do
       expect(validator.valid?).to be(false)
-      expect(validator.errors).not_to be_empty
+      expect(validator.errors[:manifest_parser_errors]).not_to be_empty
+    end
+
+    context 'and incorrect defaults' do
+      let(:manifest_file_name) { 'manifest_invalid-md6_and_defaults.yml' }
+
+      it 'reports manifest parser errors only' do
+        expect(validator).to_not receive(:validate_default_versions)
+        expect(validator.valid?).to be(false)
+        expect(validator.errors[:manifest_parser_errors]).not_to be_empty
+      end
     end
   end
 end

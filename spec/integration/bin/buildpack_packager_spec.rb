@@ -84,15 +84,12 @@ MANIFEST
       manifest_file.write <<-MANIFEST
 ---
 language: sample
-
-default_versions:
-  - name: fake_name
-    version: 1.1.1.1.1.1
-
 dependencies:
   - name: fake_name
     version: 1.2
     uri: file://#{file_location}
+    md5: md5
+    cf_stacks: [cflinuxfs2]
 MANIFEST
     end
 
@@ -266,7 +263,6 @@ MANIFEST
       output, status = run_packager_binary(buildpack_dir, flags)
 
       expect(output).to include('conform to the schema')
-      expect(output).to include('default_versions')
       expect(status).not_to be_success
     end
   end
