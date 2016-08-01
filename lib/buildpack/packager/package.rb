@@ -58,7 +58,11 @@ module Buildpack
       end
 
       def list
-        DependenciesPresenter.new(manifest['dependencies']).to_markdown
+        DependenciesPresenter.new(manifest['dependencies']).present
+      end
+
+      def defaults
+        DefaultVersionsPresenter.new(manifest['default_versions']).present
       end
 
       def zip_file_path

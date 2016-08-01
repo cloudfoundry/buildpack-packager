@@ -1,5 +1,7 @@
 require 'buildpack/packager/version'
+require 'buildpack/packager/table_presentation'
 require 'buildpack/packager/dependencies_presenter'
+require 'buildpack/packager/default_versions_presenter'
 require 'buildpack/packager/package'
 require 'active_support/core_ext/hash/indifferent_access'
 require 'open3'
@@ -35,6 +37,11 @@ module Buildpack
     def self.list(options)
       package = Package.new(options)
       package.list
+    end
+
+    def self.defaults(options)
+      package = Package.new(options)
+      package.defaults
     end
 
     def self.check_for_zip

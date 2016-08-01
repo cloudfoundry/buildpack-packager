@@ -195,6 +195,38 @@ MANIFEST
       end
     end
 
+    describe '--defaults flag' do
+      let(:flags) { '--defaults' }
+
+      before do
+        create_manifests
+      end
+
+      context 'default manifest with no default_versions' do
+        it 'emits an empty table' do
+          output = run_packager_binary(buildpack_dir, flags)
+          stdout = output.first
+
+          expect(stdout).to match(/ name | version/)
+          expect(stdout).to match(/------/) # it's a table!
+          expect(stdout.split("\m").length).to eq(2)
+        end
+      end
+
+      context 'custom manifest with default_versions' do
+        let(:flags) { '--defaults --use-custom-manifest=manifest-including-default-versions.yml' }
+
+        it 'emits a table of the manifest specified default dependency versions' do
+          output = run_packager_binary(buildpack_dir, flags)
+          stdout = output.first
+
+          expect(stdout).to match(/ name | version/)
+          expect(stdout).to match(/fake_name.*1\.2/)
+          expect(stdout).to match(/------/) # it's a table!
+        end
+      end
+    end
+
     describe '--use-custom-manifest' do
       let(:flags) { '--uncached' }
 
@@ -274,7 +306,7 @@ MANIFEST
       specify do
         output, status = run_packager_binary(buildpack_dir, flags)
 
-        expect(output).to include('USAGE: buildpack-packager < --cached | --uncached | --list >')
+        expect(output).to include('USAGE: buildpack-packager < --cached | --uncached | --list | --defaults >')
         expect(status).not_to be_success
       end
     end
@@ -285,7 +317,7 @@ MANIFEST
       it 'reports proper usage' do
         output, status = run_packager_binary(buildpack_dir, flags)
 
-        expect(output).to include('USAGE: buildpack-packager < --cached | --uncached | --list >')
+        expect(output).to include('USAGE: buildpack-packager < --cached | --uncached | --list | --defaults >')
         expect(status).not_to be_success
       end
     end

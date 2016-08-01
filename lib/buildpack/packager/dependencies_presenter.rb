@@ -3,6 +3,8 @@ require 'terminal-table'
 module Buildpack
   module Packager
     class DependenciesPresenter < Struct.new(:dependencies)
+      include TablePresentation
+
       def inspect
         has_modules = dependencies.any? { |dependency| dependency['modules'] }
 
@@ -31,20 +33,8 @@ module Buildpack
         table.to_s
       end
 
-      def to_markdown
-        inspect.split("\n")[1...-1].tap { |lines| lines[1].tr!('+', '|') }.join("\n")
-      end
-
-      private
-
-      def sanitize_version_string(version)
-        version == 0 ? '-' : version
-      end
-
-      def sort_string_for(dependency)
-        interpreter_names = %w(ruby jruby php hhvm python go node)
-        sort_index = interpreter_names.index(dependency['name']) || 9999
-        sprintf '%s-%s-%s', sort_index, dependency['name'], dependency['version']
+      def present
+        to_markdown(inspect)
       end
     end
   end

@@ -3,7 +3,7 @@ require 'buildpack/packager'
 require 'optparse'
 require 'buildpack/manifest_validator'
 
-SUPPORTED_MODES = %w(cached uncached list).freeze
+SUPPORTED_MODES = %w(cached uncached list defaults).freeze
 USAGE_MSG       = "USAGE: #{File.basename(__FILE__)} < #{SUPPORTED_MODES.map { |mode| '--' + mode }.join(' | ')} >".freeze
 
 options = {
@@ -25,6 +25,10 @@ optparser = OptionParser.new do |opts|
 
   opts.on('--list', 'List dependencies supported by the buildpack.') do
     options[:mode] = :list
+  end
+
+  opts.on('--defaults', 'List default dependency versions specified by the buildpack.') do
+    options[:mode] = :defaults
   end
 
   opts.on('--force-download', 'Force dependencies to be downloaded from the internet. (default is false)') do
@@ -68,6 +72,8 @@ end
 
 if options[:mode] == :list
   puts Buildpack::Packager.list(options)
+elsif options[:mode] == :defaults
+  puts Buildpack::Packager.defaults(options)
 else
   Buildpack::Packager.package(options)
 end
