@@ -40,7 +40,7 @@ MANIFEST
   end
 
   def create_full_manifest
-    File.open(File.join(buildpack_dir, 'manifest-including-unsupported.yml'), 'w') do |manifest_file|
+    File.open(File.join(buildpack_dir, 'manifest-including-default-versions.yml'), 'w') do |manifest_file|
       manifest_file.write <<-MANIFEST
 ---
 language: sample
@@ -76,7 +76,7 @@ exclude_files:
 MANIFEST
     end
 
-    files_to_include << 'manifest-including-unsupported.yml'
+    files_to_include << 'manifest-including-default-versions.yml'
   end
 
   def create_invalid_manifest
@@ -144,56 +144,57 @@ MANIFEST
     FileUtils.remove_entry tmp_dir
   end
 
-  describe 'list flag' do
-    let(:flags) { '--list' }
-
-    before do
-      create_manifests
-    end
-
-    context 'default manifest' do
-      it 'emits a table of contents' do
-        output = run_packager_binary(buildpack_dir, flags)
-        stdout = output.first
-
-        expect(stdout).to match(/fake_name.*1\.2/)
-        expect(stdout).to match(/------/) # it's a table!
-      end
-
-      context 'and there are modules' do
-        it 'emit a table for modules' do
-          output = run_packager_binary(buildpack_dir, flags)
-          stdout = output.first
-
-          expect(stdout).to match /modules/
-          expect(stdout).to match /one, three, two/
-        end
-      end
-    end
-
-    context 'custom manifest' do
-      let(:flags) { '--list --use-custom-manifest=manifest-including-unsupported.yml' }
-      it 'emits a table of contents' do
-        output = run_packager_binary(buildpack_dir, flags)
-        stdout = output.first
-
-        expect(stdout).to match(/fake_name.*1\.1/)
-        expect(stdout).to match(/fake_name.*1\.2/)
-        expect(stdout).to match(/------/) # it's a table!
-      end
-
-      context 'and there are no modules' do
-        it 'ensures there is no modules column' do
-          output = run_packager_binary(buildpack_dir, flags)
-          stdout = output.first
-
-          expect(stdout).to_not match /modules/
-        end
-      end
-    end
-  end
-
   describe 'flags' do
+    describe '--list flag' do
+      let(:flags) { '--list' }
+
+      before do
+        create_manifests
+      end
+
+      context 'default manifest' do
+        it 'emits a table of contents' do
+          output = run_packager_binary(buildpack_dir, flags)
+          stdout = output.first
+
+          expect(stdout).to match(/fake_name.*1\.2/)
+          expect(stdout).to match(/------/) # it's a table!
+        end
+
+        context 'and there are modules' do
+          it 'emit a table for modules' do
+            output = run_packager_binary(buildpack_dir, flags)
+            stdout = output.first
+
+            expect(stdout).to match /modules/
+            expect(stdout).to match /one, three, two/
+          end
+        end
+      end
+
+      context 'custom manifest' do
+        let(:flags) { '--list --use-custom-manifest=manifest-including-default-versions.yml' }
+
+        it 'emits a table of contents' do
+          output = run_packager_binary(buildpack_dir, flags)
+          stdout = output.first
+
+          expect(stdout).to match(/fake_name.*1\.1/)
+          expect(stdout).to match(/fake_name.*1\.2/)
+          expect(stdout).to match(/------/) # it's a table!
+        end
+
+        context 'and there are no modules' do
+          it 'ensures there is no modules column' do
+            output = run_packager_binary(buildpack_dir, flags)
+            stdout = output.first
+
+            expect(stdout).to_not match /modules/
+          end
+        end
+      end
+    end
+
     describe '--use-custom-manifest' do
       let(:flags) { '--uncached' }
 
@@ -202,7 +203,7 @@ MANIFEST
       end
 
       context 'with the flag' do
-        let(:flags) { '--uncached --use-custom-manifest=manifest-including-unsupported.yml' }
+        let(:flags) { '--uncached --use-custom-manifest=manifest-including-default-versions.yml' }
 
         it 'uses the specified manifest' do
           run_packager_binary(buildpack_dir, flags)
@@ -217,7 +218,7 @@ MANIFEST
 
           manifest_contents = File.read(manifest_location)
 
-          expect(manifest_contents).to eq(File.read(File.join(buildpack_dir, 'manifest-including-unsupported.yml')))
+          expect(manifest_contents).to eq(File.read(File.join(buildpack_dir, 'manifest-including-default-versions.yml')))
         end
       end
 
