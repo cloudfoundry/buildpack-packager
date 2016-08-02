@@ -26,7 +26,8 @@ module Buildpack
 
       def download_dependencies(dependencies, local_cache_directory, dependency_dir)
         dependencies.each do |dependency|
-          translated_filename = uri_cache_path(dependency['uri'])
+          safe_uri = uri_without_credentials(dependency['uri'])
+          translated_filename = uri_cache_path(safe_uri)
           local_cached_file = File.expand_path(File.join(local_cache_directory, translated_filename))
 
           if options[:force_download] || !File.exist?(local_cached_file)
@@ -70,6 +71,15 @@ module Buildpack
       end
 
       private
+
+      def uri_without_credentials(uri_string)
+        uri = URI(uri_string)
+        if uri.userinfo
+          uri.user = "-redacted-" if uri.user
+          uri.password = "-redacted-" if uri.password
+        end
+        uri.to_s.sub("file:", "file://")
+      end
 
       def uri_cache_path uri
         uri.gsub(/[:\/\?&]/, '_')

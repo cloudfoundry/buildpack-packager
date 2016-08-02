@@ -150,6 +150,24 @@ module Buildpack
           package = Package.new
           expect(package.send(:uri_cache_path, url_with_parameters)).to eq("http___some.cdn_with_parameters=true_secondParameter=present")
         end
+
+        context 'url has login and password authentication credentials' do
+          let(:url_with_credentials) { 'http://log!i213:pas!9sword@some.cdn/with' }
+
+          it 'redacts the credentials in the resulting file path' do
+            package = Package.new
+            expect(package.send(:uri_without_credentials, url_with_credentials)).to eq("http://-redacted-:-redacted-@some.cdn/with")
+          end
+        end
+
+        context 'url has a login authentication credential' do
+          let(:url_with_credentials) { 'http://log!i213@some.cdn/with' }
+
+          it 'redacts the credential in the resulting file path' do
+            package = Package.new
+            expect(package.send(:uri_without_credentials, url_with_credentials)).to eq("http://-redacted-@some.cdn/with")
+          end
+        end
       end
 
       describe '#build_zip_file' do
