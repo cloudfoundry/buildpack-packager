@@ -2,9 +2,10 @@ require 'spec_helper'
 require 'fileutils'
 
 describe 'Buildpack packager output' do
-  let(:buildpack_type) { '--uncached' }
-  let(:buildpack_fixture) { File.join(File.dirname(__FILE__), '..', 'fixtures', 'buildpack') }
-  let(:tmpdir) { Dir.mktmpdir }
+  let(:buildpack_type)    { '--uncached' }
+  let(:fixture_name)      { 'buildpack-without-uri-credentials' }
+  let(:buildpack_fixture) { File.join(File.dirname(__FILE__), '..', 'fixtures', fixture_name) }
+  let(:tmpdir)            { Dir.mktmpdir }
 
   before do
     FileUtils.rm_rf(tmpdir)
@@ -21,7 +22,7 @@ describe 'Buildpack packager output' do
   context 'building the uncached buildpack' do
     it 'outputs the type of buildpack created, where and its human readable size' do
       expect(subject).to include("Uncached buildpack created and saved as")
-      expect(subject).to include("spec/fixtures/buildpack/go_buildpack-v1.7.8.zip")
+      expect(subject).to include("spec/fixtures/#{fixture_name}/go_buildpack-v1.7.8.zip")
       expect(subject).to match(/with a size of 4\.0K$/)
     end
   end
@@ -43,7 +44,7 @@ Downloading godep version v74 from: https://pivotal-buildpacks.s3.amazonaws.com/
 
     it 'outputs the type of buildpack created, where and its human readable size' do
       expect(subject).to include("Cached buildpack created and saved as")
-      expect(subject).to include("spec/fixtures/buildpack/go_buildpack-cached-v1.7.8.zip")
+      expect(subject).to include("spec/fixtures/#{fixture_name}/go_buildpack-cached-v1.7.8.zip")
       expect(subject).to match(/with a size of 68M$/)
     end
 
@@ -58,6 +59,15 @@ Using go version 1.6.3 from local cache at: #{tmpdir}/.buildpack-packager/cache/
 Using godep version v74 from local cache at: #{tmpdir}/.buildpack-packager/cache/https___pivotal-buildpacks.s3.amazonaws.com_concourse-binaries_godep_godep-v74-linux-x64.tgz with size 2.8M
   godep version v74 matches the manifest provided md5 checksum of 70220eee9f9e654e0b85887f696b6add
         HEREDOC
+      end
+    end
+
+    context 'with auth credentials in the dependency uri' do
+      let(:fixture_name) { 'buildpack-with-uri-credentials' }
+
+      it 'outputs the dependencies download source url without the credentials' do
+        expect(subject).to include('Downloading go version 1.6.3 from: https://-redacted-:-redacted-@buildpacks.cloudfoundry.org/concourse-binaries/go/go1.6.3.linux-amd64.tar.gz')
+        expect(subject).to include('Downloading godep version v74 from: https://-redacted-:-redacted-@pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/godep/godep-v74-linux-x64.tgz')
       end
     end
   end

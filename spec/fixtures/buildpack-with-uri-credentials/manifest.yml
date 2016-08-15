@@ -1,0 +1,36 @@
+---
+language: go
+url_to_dependency_map:
+- match: go(\d+\.\d+(.*))
+  name: go
+  version: "$1"
+- match: godep
+  name: godep
+  version: v74
+dependencies:
+- name: go
+  version: 1.6.3
+  uri: https://login:password@buildpacks.cloudfoundry.org/concourse-binaries/go/go1.6.3.linux-amd64.tar.gz
+  md5: 5f7bf9d61d2b0dd75c9e2cd7a87272cc
+  cf_stacks:
+  - cflinuxfs2
+- name: godep
+  version: v74
+  uri: https://login:hunter3@pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/godep/godep-v74-linux-x64.tgz
+  md5: 70220eee9f9e654e0b85887f696b6add
+  cf_stacks:
+  - cflinuxfs2
+exclude_files:
+- ".git/"
+- ".gitignore"
+- ".gitmodules"
+- cf_spec/
+- log/
+- bin/package
+- buildpack-packager/
+- test-godir/
+- test/
+- Makefile
+- PULL_REQUEST_TEMPLATE
+- ISSUE_TEMPLATE
+- go_buildpack-*v*.zip

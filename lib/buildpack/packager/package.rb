@@ -31,7 +31,7 @@ module Buildpack
           local_cached_file = File.expand_path(File.join(local_cache_directory, translated_filename))
 
           if options[:force_download] || !File.exist?(local_cached_file)
-	    puts "Downloading #{dependency['name']} version #{dependency['version']} from: #{dependency['uri']}"
+	    puts "Downloading #{dependency['name']} version #{dependency['version']} from: #{safe_uri}"
             download_file(dependency['uri'], local_cached_file)
             human_readable_size = `du -h #{local_cached_file} | cut -f1`.strip
             puts "  Using #{dependency['name']} version #{dependency['version']} with size #{human_readable_size}"
