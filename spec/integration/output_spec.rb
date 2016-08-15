@@ -67,7 +67,7 @@ Using godep version v74 from local cache at: #{tmpdir}/.buildpack-packager/cache
 
       it 'outputs the dependencies download source url without the credentials' do
         expect(subject).to include('Downloading go version 1.6.3 from: https://-redacted-:-redacted-@buildpacks.cloudfoundry.org/concourse-binaries/go/go1.6.3.linux-amd64.tar.gz')
-        expect(subject).to include('Downloading godep version v74 from: https://-redacted-:-redacted-@pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/godep/godep-v74-linux-x64.tgz')
+        expect(subject).to include('Downloading godep version v74 from: https://-redacted-:-redacted-@buildpacks.cloudfoundry.org/concourse-binaries/godep/godep-v74-linux-x64.tgz')
       end
     end
   end
