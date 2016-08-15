@@ -9,15 +9,9 @@ url_to_dependency_map:
   version: v74
 dependencies:
 - name: go
-  version: 1.6.1
-  uri: https://storage.googleapis.com/golang/go1.6.1.linux-amd64.tar.gz
-  md5: e277d18dac8a0b9945d4c53adf6e52ee
-  cf_stacks:
-  - cflinuxfs2
-- name: go
-  version: 1.6.2
-  uri: https://storage.googleapis.com/golang/go1.6.2.linux-amd64.tar.gz
-  md5: ebfb8b38330c8779b121c43433c4b9be
+  version: 1.6.3
+  uri: https://buildpacks.cloudfoundry.org/concourse-binaries/go/go1.6.3.linux-amd64.tar.gz
+  md5: 5f7bf9d61d2b0dd75c9e2cd7a87272cc
   cf_stacks:
   - cflinuxfs2
 - name: godep
