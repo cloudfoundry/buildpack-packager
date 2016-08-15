@@ -31,15 +31,13 @@ describe 'Buildpack packager output' do
     let(:buildpack_type) { '--cached' }
 
     it 'outputs the dependencies downloaded, their versions, and download source url' do
-      expect(subject).to include(<<-HEREDOC)
-Downloading go version 1.6.3 from: https://buildpacks.cloudfoundry.org/concourse-binaries/go/go1.6.3.linux-amd64.tar.gz
-  Using go version 1.6.3 with size 65M
-  go version 1.6.3 matches the manifest provided md5 checksum of 5f7bf9d61d2b0dd75c9e2cd7a87272cc
+      expect(subject).to include("Downloading go version 1.6.3 from: https://buildpacks.cloudfoundry.org/concourse-binaries/go/go1.6.3.linux-amd64.tar.gz")
+      expect(subject).to include("Using go version 1.6.3 with size")
+      expect(subject).to include("go version 1.6.3 matches the manifest provided md5 checksum of 5f7bf9d61d2b0dd75c9e2cd7a87272cc")
 
-Downloading godep version v74 from: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/godep/godep-v74-linux-x64.tgz
-  Using godep version v74 with size 2.8M
-  godep version v74 matches the manifest provided md5 checksum of 70220eee9f9e654e0b85887f696b6add
-      HEREDOC
+      expect(subject).to include("Downloading godep version v74 from: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/godep/godep-v74-linux-x64.tgz")
+      expect(subject).to include("Using godep version v74 with size 2.8M")
+      expect(subject).to include("godep version v74 matches the manifest provided md5 checksum of 70220eee9f9e654e0b85887f696b6add")
     end
 
     it 'outputs the type of buildpack created, where and its human readable size' do
@@ -52,13 +50,11 @@ Downloading godep version v74 from: https://pivotal-buildpacks.s3.amazonaws.com/
       before { buildpack_packager_execute(buildpack_fixture, tmpdir) }
 
       it 'outputs the dependencies downloaded, their versions, and cache location' do
-        expect(subject).to include(<<-HEREDOC)
-Using go version 1.6.3 from local cache at: #{tmpdir}/.buildpack-packager/cache/https___buildpacks.cloudfoundry.org_concourse-binaries_go_go1.6.3.linux-amd64.tar.gz with size 65M
-  go version 1.6.3 matches the manifest provided md5 checksum of 5f7bf9d61d2b0dd75c9e2cd7a87272cc
+        expect(subject).to include("Using go version 1.6.3 from local cache at: #{tmpdir}/.buildpack-packager/cache/https___buildpacks.cloudfoundry.org_concourse-binaries_go_go1.6.3.linux-amd64.tar.gz with size")
+        expect(subject).to include("go version 1.6.3 matches the manifest provided md5 checksum of 5f7bf9d61d2b0dd75c9e2cd7a87272cc")
 
-Using godep version v74 from local cache at: #{tmpdir}/.buildpack-packager/cache/https___pivotal-buildpacks.s3.amazonaws.com_concourse-binaries_godep_godep-v74-linux-x64.tgz with size 2.8M
-  godep version v74 matches the manifest provided md5 checksum of 70220eee9f9e654e0b85887f696b6add
-        HEREDOC
+        expect(subject).to include("Using godep version v74 from local cache at: #{tmpdir}/.buildpack-packager/cache/https___pivotal-buildpacks.s3.amazonaws.com_concourse-binaries_godep_godep-v74-linux-x64.tgz with size")
+        expect(subject).to include("godep version v74 matches the manifest provided md5 checksum of 70220eee9f9e654e0b85887f696b6add")
       end
     end
 
