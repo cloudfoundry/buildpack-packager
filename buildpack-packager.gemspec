@@ -9,9 +9,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Cloud Foundry Buildpacks Team']
   spec.email         = ['cf-buildpacks-eng@pivotal.io']
   spec.summary       = 'Tool that packages your buildpacks based on a manifest'
-  spec.description   = 'Tool that packages your buildpacks based on a manifest'
+  spec.description   = 'Tool that packages your Cloud Foundry buildpacks based on a manifest'
   spec.homepage      = 'https://github.com/cloudfoundry/buildpack-packager'
-  spec.license       = 'Apache 2.0'
+  spec.license       = 'Apache-2.0'
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
@@ -20,14 +20,14 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '~> 2.2'
 
-  spec.add_dependency 'activesupport', '~> 4.1.8'
-  spec.add_dependency 'kwalify'
-  spec.add_dependency 'terminal-table', '~> 1.4.5'
+  spec.add_dependency 'activesupport', '~> 4.1'
+  spec.add_dependency 'kwalify', '~> 0'
+  spec.add_dependency 'terminal-table', '~> 1.4'
 
   spec.add_development_dependency 'bundler', '~> 1.7'
   spec.add_development_dependency 'rake', '~> 10.0'
-  spec.add_development_dependency 'rspec'
-  spec.add_development_dependency 'rubyzip'
-  spec.add_development_dependency 'rubocop'
-  spec.add_development_dependency 'rubocop-rspec'
+  spec.add_development_dependency 'rspec', '~> 3.5'
+  spec.add_development_dependency 'rubyzip', '~> 1.2'
+  spec.add_development_dependency 'rubocop', '~> 0'
+  spec.add_development_dependency 'rubocop-rspec', '~> 1.5'
 end
