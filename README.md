@@ -68,13 +68,13 @@ By default, `buildpack-packager` stores the dependencies that it
 downloads while building a cached buildpack in a local cache at
 `~/.buildpack-packager`. This is in order to avoid redownloading them
 when repackaging similar buildpacks. Running `buildpack-packager
-cached` with the the `--force-download` option will force the packager
+cached` with the `--force-download` option will force the packager
 to download dependencies from the s3 host and ignore the local cache.
 
 #### --use-custom-manifest
 
 If you would like to include a different manifest file in your
-packaged buildpack, you may call `buildpack-packager` with the the
+packaged buildpack, you may call `buildpack-packager` with the
 `--use-custom-manifest [path/to/manifest.yml]`
 option. `buildpack-packager` will generate a buildpack with the
 specified manifest. If you are building a cached buildpack,
