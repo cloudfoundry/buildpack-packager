@@ -1,0 +1,25 @@
+---
+language: go
+
+url_to_dependency_map:
+  - match: go(\d+\.\d+(\.\d+)?)
+    name: go
+    version: $1
+
+dependencies:
+  - name: go
+    version: 1.2
+    uri: http://go.googlecode.com/files/go1.2.linux-amd64.tar.gz
+    md5: 68901bbf8a04e71e0b30aa19c3946b21
+    cf_stacks:
+      - lucid64
+      - cflinuxfs2
+
+dependency_deprecation_dates:
+ - match: 1.2.\\d
+   version_line: 1.2
+   name: go
+   date: 2016-01-18
+
+exclude_files:
+  - .git/

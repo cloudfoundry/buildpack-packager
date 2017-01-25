@@ -87,7 +87,7 @@ manifest as well.
 The packager looks for a `manifest.yml` file in the current working
 directory, which should be the root of your buildpack.
 
-A sample manifest (all keys are required):
+A sample manifest (all keys (excepting dependency_deprecation_dates) are required):
 
 ```yaml
 ---
@@ -115,7 +115,13 @@ dependencies:
     md5: 72b4d193a11766e2a4c45c1fed65754c
     cf_stacks:
       - lucid64
-      
+
+dependency_deprecation_dates:
+- match: 2.1.\\d
+  version_line: 2.1
+  name: ruby
+  date: 2016-03-30
+
 exclude_files:
   - .gitignore
   - private.key
@@ -157,6 +163,24 @@ into a locally cached url (useful for cached mode).
 
 Read more on the [compile-extensions repo](https://github.com/cloudfoundry-incubator/compile-extensions).
 
+
+## dependency_deprecation_dates (optional)
+
+
+The dependency_deprecation_dates specifies the date at which dependencies
+will be end of life (and thus removed from the buildpack). By specifying
+EOL here, buildpack maintainers can set a date which will trigger warnings
+for users 30 days before the EOL date is reached.
+
+All keys are required:
+
+- `name`, `match`:
+Required for `dependency_deprecation_dates` to work. Dependencies are matched to the
+name and a regexp of `match` and the dependency version
+
+- `date`, `version_line`:
+Required to generate the warning message for users, eg:
+`WARNING: Ruby 2.1 will no longer be available in new buildpacks released after 2016-03-30`
 
 ## exclude_files (required)
 

@@ -3,6 +3,24 @@ mapping:
   "language":
     type:      str
     required:  yes
+  "dependency_deprecation_dates":
+    type:      seq
+    required:  no
+    sequence:
+      - type: map
+        mapping:
+         "match":
+           type: str
+           required: yes
+         "version_line":
+           type: text
+           required: yes
+         "name":
+           type: str
+           required: yes
+         "date":
+           type: date
+           required: yes
   "url_to_dependency_map":
     type:      seq
     required:  yes

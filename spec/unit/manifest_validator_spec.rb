@@ -12,6 +12,15 @@ describe Buildpack::ManifestValidator do
       expect(validator.valid?).to be(true)
       expect(validator.errors).to be_empty
     end
+
+    context 'and deprecation dates' do
+      let(:manifest_file_name) { 'manifest_valid_plus_deprecation_dates.yml' }
+
+      it 'reports valid manifests correctly' do
+        expect(validator.valid?).to be(true)
+        expect(validator.errors).to be_empty
+      end
+    end
   end
 
   context 'with a manifest with an invalid md5 key' do
