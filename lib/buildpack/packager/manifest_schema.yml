@@ -64,7 +64,7 @@ mapping:
            required:  yes
            sequence:
              - type: str
-               enum: [ lucid64, cflinuxfs2 ]
+               enum: [ lucid64, cflinuxfs2, windows2012R2 ]
   "exclude_files":
     type:      seq
     required:  yes
