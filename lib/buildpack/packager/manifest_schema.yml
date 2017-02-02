@@ -83,3 +83,6 @@ mapping:
          "version":
            type: text
            required:  yes
+  "pre_package":
+    type: str
+    required: no

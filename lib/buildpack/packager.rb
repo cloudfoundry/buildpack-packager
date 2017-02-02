@@ -24,6 +24,10 @@ module Buildpack
 
         package.build_dependencies(temp_dir) if options[:mode] == :cached
 
+        Dir.chdir(temp_dir) do
+          package.run_pre_package
+        end
+
         package.build_zip_file(temp_dir)
       end
 

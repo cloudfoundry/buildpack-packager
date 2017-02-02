@@ -450,5 +450,36 @@ module Buildpack
         end
       end
     end
+
+    describe 'pre package script' do
+      let(:buildpack_mode) { :uncached }
+
+      before do
+        FileUtils.mkdir_p(File.join(buildpack_dir, 'scripts'))
+        script_path = File.join(buildpack_dir, 'scripts/run.sh')
+        File.write(script_path, 'mkdir .cloudfoundry && touch .cloudfoundry/hwc.exe')
+        File.chmod(0755, script_path)
+      end
+
+      it 'runs the pre package script if specified' do
+        create_manifest(pre_package: 'scripts/run.sh')
+        Packager.package(options)
+
+        zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
+        zip_contents = get_zip_contents(zip_file_path)
+
+        expect(zip_contents).to include('.cloudfoundry/hwc.exe')
+      end
+
+      it 'does not run the pre package script if not specified' do
+        create_manifest(pre_package: nil)
+        Packager.package(options)
+
+        zip_file_path = File.join(buildpack_dir, 'sample_buildpack-v1.2.3.zip')
+        zip_contents = get_zip_contents(zip_file_path)
+
+        expect(zip_contents).not_to include('.cloudfoundry/hwc.exe')
+      end
+    end
   end
 end

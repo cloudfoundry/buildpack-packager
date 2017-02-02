@@ -70,6 +70,12 @@ module Buildpack
         Shellwords.escape(File.join(options[:root_dir], zip_file_name))
       end
 
+      def run_pre_package
+        if manifest['pre_package'] && !Kernel.system(manifest['pre_package'])
+          raise "Failed to run pre_package script: #{manifest['pre_package']}"
+        end
+      end
+
       private
 
       def uri_without_credentials(uri_string)
