@@ -191,6 +191,42 @@ module Buildpack
           packager.build_zip_file('hello_dir')
         end
       end
+
+      describe '#run_pre_package' do
+        context 'when manifest has pre_package set' do
+          let(:manifest) do
+            { pre_package: 'scripts/build.sh' }
+          end
+
+          context 'when the pre package script succeeds' do
+            it 'does not raise an error' do
+              allow(Kernel).to receive(:system)
+                .with('scripts/build.sh')
+                .and_return(true)
+
+              packager.run_pre_package
+              expect(Kernel).to have_received(:system)
+            end
+          end
+
+          context 'when the pre package script fails' do
+            it 'raises an error' do
+              allow(Kernel).to receive(:system)
+                .with('scripts/build.sh')
+                .and_return(false)
+              expect { packager.run_pre_package }.to raise_error('Failed to run pre_package script: scripts/build.sh')
+            end
+          end
+        end
+
+        context 'when manifest does not have pre_package set' do
+          it 'does nothing' do
+            expect(Kernel).not_to receive(:system)
+
+            packager.run_pre_package
+          end
+        end
+      end
     end
   end
 end
