@@ -157,10 +157,6 @@ Required to ensure that dependencies being packaged for 'cached' mode have not b
 - `cf_stacks`:
 Required to ensure the right binary is selected for the root file system in which an app will be running on.  Currently supported root file systems are lucid64(default) and cflinuxfs2. *Note that if the same dependency is used for both root file systems, both can be listed under the `cf_stacks` key.*
 
-To have your buildpack use these 'cached' dependencies, use
-`compile_extensions/bin/translate_dependency_url` to translate the url
-into a locally cached url (useful for cached mode).
-
 Read more on the [compile-extensions repo](https://github.com/cloudfoundry-incubator/compile-extensions).
 
 
