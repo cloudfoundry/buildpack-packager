@@ -11,7 +11,7 @@ mapping:
         mapping:
          "match":
            type: str
-           required: yes
+           required: no
          "version_line":
            type: text
            required: yes
@@ -23,7 +23,7 @@ mapping:
            required: yes
   "url_to_dependency_map":
     type:      seq
-    required:  yes
+    required:  no
     sequence:
       - type: map
         mapping:

@@ -21,6 +21,15 @@ describe Buildpack::ManifestValidator do
         expect(validator.errors).to be_empty
       end
     end
+
+    context 'and new deprecation dates with no url mapping' do
+      let(:manifest_file_name) { 'manifest_valid_new_deprecation_dates_no_url_map.yml' }
+
+      it 'reports valid manifests correctly' do
+        expect(validator.valid?).to be(true)
+        expect(validator.errors).to be_empty
+      end
+    end
   end
 
   context 'with a manifest with an invalid md5 key' do
