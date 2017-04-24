@@ -1,10 +1,10 @@
 # Disconnected environments
 
 ### Deploying Apps on disconnected environments
-Cached buildpacks only ensure that a the buildpacks dependencies are cached, not your applications.
+Cached buildpacks only ensure that the buildpack's dependencies are cached, not your applications.
 
 When you work with a disconnected environment, it's important to use your package manager
-to 'vendor' your applications dependencies.
+to 'vendor' your application's dependencies.
 
 The specific mechanism varies between platforms. See your buildpack's documentation for 'vendoring' advice.
 
@@ -39,7 +39,7 @@ The specific mechanism varies between platforms. See your buildpack's documentat
   Currently, you can only specify cached buildpacks by creating Cloud Foundry Admin Buildpacks.
   
   This means you need admin rights. See the 
-  [Open source admin documentation](http://docs.cloudfoundry.org/adminguide/buildpacks.html)
+  [open source admin documentation](http://docs.cloudfoundry.org/adminguide/buildpacks.html)
   for more information.
   
   Upload the buildpack to your Cloud Foundry and specify it by name:
