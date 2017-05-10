@@ -21,6 +21,9 @@ mapping:
          "date":
            type: date
            required: yes
+         "link":
+           type: str
+           required: no
   "url_to_dependency_map":
     type:      seq
     required:  no

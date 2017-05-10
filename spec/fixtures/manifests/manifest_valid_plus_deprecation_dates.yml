@@ -20,6 +20,7 @@ dependency_deprecation_dates:
    version_line: 1.2
    name: go
    date: 2016-01-18
+   link: https://link.io
 
 exclude_files:
   - .git/
