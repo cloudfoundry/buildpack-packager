@@ -42,9 +42,37 @@ exclude_files: []
 default_versions:
   - name: python
     version: 3.3.5
+  - name: pip
+    version: 3.x
+  - name: ruby
+    version: 5.5.x
 dependencies:
   - name: python
     version: 3.3.5
+    uri: http://example.com/
+    md5: 68901bbf8a04e71e0b30aa19c3946b21
+    cf_stacks:
+      - cflinuxfs2
+  - name: pip
+    version: 3.3.4
+    uri: http://example.com/
+    md5: 68901bbf8a04e71e0b30aa19c3946b21
+    cf_stacks:
+      - cflinuxfs2
+  - name: pip
+    version: 3.3.2
+    uri: http://example.com/
+    md5: 68901bbf8a04e71e0b30aa19c3946b21
+    cf_stacks:
+      - cflinuxfs2
+  - name: ruby
+    version: 5.4.3
+    uri: http://example.com/
+    md5: 68901bbf8a04e71e0b30aa19c3946b21
+    cf_stacks:
+      - cflinuxfs2
+  - name: ruby
+    version: 5.5.3
     uri: http://example.com/
     md5: 68901bbf8a04e71e0b30aa19c3946b21
     cf_stacks:
@@ -53,8 +81,9 @@ dependencies:
     }
 
     it 'emits no errors' do
-      _, status = run_packager_binary(buildpack_dir, flags)
+      stdout, status = run_packager_binary(buildpack_dir, flags)
 
+      puts stdout
       expect(status).to be_success
     end
   end
@@ -67,8 +96,12 @@ default_versions:
     version: 3.3.5
   - name: python
     version: 3.3.2
+  - name: pip
+    version: 7.7.x
+  - name: pip
+    version: 7.7.2
   - name: ruby
-    version: 4.3.5
+    version: 4.x
   - name: ruby
     version: 4.3.2
 dependencies:
@@ -90,6 +123,16 @@ dependencies:
   - name: ruby
     uri: https://a.org
     version: 4.3.2
+    md5: 3a2
+    cf_stacks: [cflinuxfs2]
+  - name: pip
+    uri: https://a.org
+    version: 7.7.7
+    md5: 3a2
+    cf_stacks: [cflinuxfs2]
+  - name: pip
+    uri: https://a.org
+    version: 7.7.2
     md5: 3a2
     cf_stacks: [cflinuxfs2]
     MANIFEST
@@ -104,6 +147,8 @@ dependencies:
                            "than one 'default_versions' entry in the buildpack manifest.")
       expect(output).to include("ruby had more " +
                                   "than one 'default_versions' entry in the buildpack manifest.")
+      expect(output).to include("pip had more " +
+                                  "than one 'default_versions' entry in the buildpack manifest.")
       expect(status).to_not be_success
     end
   end
@@ -115,7 +160,9 @@ default_versions:
   - name: python
     version: 3.3.5
   - name: ruby
-    version: 4.3.5
+    version: 4.x
+  - name: pip
+    version: 7.7.x
 dependencies: []
     MANIFEST
     }
@@ -127,8 +174,10 @@ dependencies: []
 
       expect(output).to include("a 'default_versions' entry for python 3.3.5 was specified by the buildpack manifest, " +
                                   "but no 'dependencies' entry for python 3.3.5 was found in the buildpack manifest.")
-      expect(output).to include("a 'default_versions' entry for ruby 4.3.5 was specified by the buildpack manifest, " +
-                                  "but no 'dependencies' entry for ruby 4.3.5 was found in the buildpack manifest.")
+      expect(output).to include("a 'default_versions' entry for ruby 4.x was specified by the buildpack manifest, " +
+                                  "but no 'dependencies' entry for ruby 4.x was found in the buildpack manifest.")
+      expect(output).to include("a 'default_versions' entry for pip 7.7.x was specified by the buildpack manifest, " +
+                                  "but no 'dependencies' entry for pip 7.7.x was found in the buildpack manifest.")
       expect(status).to_not be_success
     end
   end
@@ -141,6 +190,8 @@ default_versions:
     version: 1.1.1
   - name: python
     version: 3.3.5
+  - name: pip
+    version: 7.7.x
 dependencies:
   - name: ruby
     uri: https://a.org
@@ -148,6 +199,11 @@ dependencies:
     md5: 3a2
     cf_stacks: [cflinuxfs2]
   - name: python
+    uri: https://a.org
+    version: 9.9.9
+    md5: 3a2
+    cf_stacks: [cflinuxfs2]
+  - name: pip
     uri: https://a.org
     version: 9.9.9
     md5: 3a2
@@ -164,6 +220,8 @@ dependencies:
                                   "but no 'dependencies' entry for python 3.3.5 was found in the buildpack manifest.")
       expect(output).to include("a 'default_versions' entry for ruby 1.1.1 was specified by the buildpack manifest, " +
                                   "but no 'dependencies' entry for ruby 1.1.1 was found in the buildpack manifest.")
+      expect(output).to include("a 'default_versions' entry for pip 7.7.x was specified by the buildpack manifest, " +
+                                  "but no 'dependencies' entry for pip 7.7.x was found in the buildpack manifest.")
       expect(status).to_not be_success
     end
   end

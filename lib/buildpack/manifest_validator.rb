@@ -1,6 +1,7 @@
 require 'kwalify'
 require 'kwalify/parser/yaml-patcher'
 require 'uri'
+require 'semantic'
 
 require 'buildpack/manifest_dependency'
 
@@ -67,8 +68,7 @@ module Buildpack
     end
 
     def validate_defaults_in_dependencies(default_versions, dependency_versions)
-      unmatched_dependencies = default_versions.select { |d| !dependency_versions.include?(d) }
-
+      unmatched_dependencies = default_versions.reject { |d| version_exists?(d, dependency_versions) }
       unmatched_dependencies.map do |dependency|
         name_version = "#{dependency.name} #{dependency.version}"
 
@@ -82,6 +82,29 @@ module Buildpack
         error_messages.unshift('The buildpack manifest is malformed:')
         error_messages<< 'For more information, see https://docs.cloudfoundry.org/buildpacks/custom.html#specifying-default-versions'
       end
+    end
+
+    private
+
+    def version_exists?(default_dependency, dependency_versions)
+      major, minor, patch = default_dependency.version.split('.')
+      major = major.gsub('v','')
+
+      if patch == 'x'
+        dependency_versions.each do |d|
+          d_version = Semantic::Version.new(d.version)
+          return true if d.name == default_dependency.name && d_version.major.to_s == major && d_version.minor.to_s == minor
+        end
+      elsif patch.nil? && minor == 'x'
+        dependency_versions.each do |d|
+          d_version = Semantic::Version.new(d.version)
+          return true if d.name == default_dependency.name && d_version.major.to_s == major
+        end
+      else
+        return dependency_versions.include?(default_dependency)
+      end
+
+      return false
     end
   end
 end
