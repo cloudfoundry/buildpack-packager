@@ -87,7 +87,7 @@ module Buildpack
     private
 
     def version_exists?(default_dependency, dependency_versions)
-      major, minor, patch = default_dependency.version.split('.')
+      major, minor, patch = default_dependency.version.to_s.split('.')
       major = major.gsub('v','')
 
       if patch == 'x'
