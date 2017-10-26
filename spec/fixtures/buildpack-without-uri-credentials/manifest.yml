@@ -11,13 +11,13 @@ dependencies:
 - name: go
   version: 1.6.3
   uri: https://buildpacks.cloudfoundry.org/concourse-binaries/go/go1.6.3.linux-amd64.tar.gz
-  md5: 5f7bf9d61d2b0dd75c9e2cd7a87272cc
+  sha256: 5ac238cd321a66a35c646d61e4cafd922929af0800c78b00375312c76e702e11
   cf_stacks:
   - cflinuxfs2
 - name: godep
   version: v74
   uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/godep/godep-v74-linux-x64.tgz
-  md5: 70220eee9f9e654e0b85887f696b6add
+  sha256: 6e6761b71e1518bf7716b3f383f10598afe5ce4592e6eea0184f17b85fd93813
   cf_stacks:
   - cflinuxfs2
 exclude_files:

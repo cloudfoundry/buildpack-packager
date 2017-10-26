@@ -50,31 +50,31 @@ dependencies:
   - name: python
     version: 3.3.5
     uri: http://example.com/
-    md5: 68901bbf8a04e71e0b30aa19c3946b21
+    sha256: aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f
     cf_stacks:
       - cflinuxfs2
   - name: pip
     version: 3.3.4
     uri: http://example.com/
-    md5: 68901bbf8a04e71e0b30aa19c3946b21
+    sha256: aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f
     cf_stacks:
       - cflinuxfs2
   - name: pip
     version: 3.3.2
     uri: http://example.com/
-    md5: 68901bbf8a04e71e0b30aa19c3946b21
+    sha256: aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f
     cf_stacks:
       - cflinuxfs2
   - name: ruby
     version: 5.4.3
     uri: http://example.com/
-    md5: 68901bbf8a04e71e0b30aa19c3946b21
+    sha256: aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f
     cf_stacks:
       - cflinuxfs2
   - name: ruby
     version: 5.5.3
     uri: http://example.com/
-    md5: 68901bbf8a04e71e0b30aa19c3946b21
+    sha256: aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f
     cf_stacks:
       - cflinuxfs2
     MANIFEST
@@ -108,32 +108,32 @@ dependencies:
   - name: python
     uri: https://a.org
     version: 3.3.5
-    md5: 3a2
+    sha256: 3a2
     cf_stacks: [cflinuxfs2]
   - name: python
     uri: https://a.org
     version: 3.3.2
-    md5: 3a2
+    sha256: 3a2
     cf_stacks: [cflinuxfs2]
   - name: ruby
     uri: https://a.org
     version: 4.3.5
-    md5: 3a2
+    sha256: 3a2
     cf_stacks: [cflinuxfs2]
   - name: ruby
     uri: https://a.org
     version: 4.3.2
-    md5: 3a2
+    sha256: 3a2
     cf_stacks: [cflinuxfs2]
   - name: pip
     uri: https://a.org
     version: 7.7.7
-    md5: 3a2
+    sha256: 3a2
     cf_stacks: [cflinuxfs2]
   - name: pip
     uri: https://a.org
     version: 7.7.2
-    md5: 3a2
+    sha256: 3a2
     cf_stacks: [cflinuxfs2]
     MANIFEST
     }
@@ -196,17 +196,17 @@ dependencies:
   - name: ruby
     uri: https://a.org
     version: 9.9.9
-    md5: 3a2
+    sha256: 3a2
     cf_stacks: [cflinuxfs2]
   - name: python
     uri: https://a.org
     version: 9.9.9
-    md5: 3a2
+    sha256: 3a2
     cf_stacks: [cflinuxfs2]
   - name: pip
     uri: https://a.org
     version: 9.9.9
-    md5: 3a2
+    sha256: 3a2
     cf_stacks: [cflinuxfs2]
     MANIFEST
     }

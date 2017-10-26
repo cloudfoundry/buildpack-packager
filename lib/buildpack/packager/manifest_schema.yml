@@ -59,7 +59,7 @@ mapping:
            required:  no
            sequence:
              - type: str
-         "md5":
+         "sha256":
            type: str
            required:  yes
          "cf_stacks":

@@ -17,7 +17,7 @@ module Buildpack
     end
     let(:translated_file_location) { 'file___' + file_location.gsub(/[:\/]/, '_') }
 
-    let(:md5) { Digest::MD5.file(file_location).hexdigest }
+    let(:sha256) { Digest::SHA256.file(file_location).hexdigest }
 
     let(:options) do
       {
@@ -41,7 +41,7 @@ module Buildpack
         dependencies: [{
           'version' => '1.0',
           'name' => 'etc_host',
-          'md5' => md5,
+          'sha256' => sha256,
           'uri' => "file://#{file_location}",
           'cf_stacks' => ['cflinuxfs2']
         }]
@@ -318,13 +318,13 @@ module Buildpack
               Packager.package(options.merge(force_download: true))
 
               expect(File).to exist(cached_file)
-              expect(Digest::MD5.file(cached_file).hexdigest).to eq md5
+              expect(Digest::SHA256.file(cached_file).hexdigest).to eq sha256
             end
           end
 
           context 'and the request fails' do
             let(:file_location) { 'fake-file-that-no-one-should-have.txt' }
-            let(:md5) { nil }
+            let(:sha256) { nil }
 
             it 'does not cache the file' do
               expect(File).to_not exist(cached_file)
@@ -350,7 +350,7 @@ module Buildpack
                 File.write(cached_file, 'asdf')
 
                 Packager.package(options.merge(force_download: true))
-                expect(Digest::MD5.file(cached_file).hexdigest).to eq md5
+                expect(Digest::SHA256.file(cached_file).hexdigest).to eq sha256
               end
             end
 
@@ -392,8 +392,8 @@ module Buildpack
     end
 
     describe 'when checking checksums' do
-      context 'with an invalid MD5' do
-        let(:md5) { 'wompwomp' }
+      context 'with an invalid SHA256' do
+        let(:sha256) { 'wompwomp' }
 
         context 'in cached mode' do
           let(:buildpack_mode) { :cached }

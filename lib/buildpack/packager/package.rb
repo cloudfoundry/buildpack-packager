@@ -109,7 +109,7 @@ module Buildpack
       end
 
       def ensure_correct_dependency_checksum(local_cached_file:, dependency:, from_local_cache:)
-        if dependency['md5'] != Digest::MD5.file(local_cached_file).hexdigest
+        if dependency['sha256'] != Digest::SHA256.file(local_cached_file).hexdigest
           if from_local_cache
             FileUtils.rm_rf(local_cached_file)
 
@@ -124,7 +124,7 @@ module Buildpack
               "File: #{dependency['name']}, version: #{dependency['version']} downloaded at location #{dependency['uri']}\n\tis reporting a different checksum than the one specified in the manifest."
           end
         else
-          puts "  #{dependency['name']} version #{dependency['version']} matches the manifest provided md5 checksum of #{dependency['md5']}\n\n"
+          puts "  #{dependency['name']} version #{dependency['version']} matches the manifest provided sha256 checksum of #{dependency['sha256']}\n\n"
         end
       end
 

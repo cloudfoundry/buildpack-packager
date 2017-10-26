@@ -20,7 +20,7 @@ describe 'reusing previously downloaded files' do
 
   let(:buildpack_dir) { Dir.mktmpdir('buildpack_') }
 
-  let(:md5) { get_md5_of_file(upstream_file_path) }
+  let(:sha256) { Digest::SHA256.file(upstream_file_path).hexdigest }
   let(:manifest) do
     {
       'exclude_files' => [],
@@ -30,7 +30,7 @@ describe 'reusing previously downloaded files' do
         'version' => '1.0',
         'name' => 'sample_download.ignore_me',
         'cf_stacks' => [],
-        'md5' => md5,
+        'sha256' => sha256,
         'uri' => upstream_file_uri
       }]
     }
@@ -64,13 +64,13 @@ describe 'reusing previously downloaded files' do
       expect(status).to be_success
     end
 
-    context 'however the file has changed, and the manifest is updated to reflect the new md5' do
+    context 'however the file has changed, and the manifest is updated to reflect the new sha256' do
       before do
         run_packager_binary(buildpack_dir, '--cached')
 
         create_upstream_file('sample_download.ignore_me', 'sample_download updated text')
-        new_md5 = get_md5_of_file(upstream_file_path)
-        manifest['dependencies'].first['md5'] = new_md5
+        new_sha256 = Digest::SHA256.file(upstream_file_path).hexdigest
+        manifest['dependencies'].first['sha256'] = new_sha256
         File.write(File.join(buildpack_dir, 'manifest.yml'), manifest.to_yaml)
       end
 

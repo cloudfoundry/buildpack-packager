@@ -28,8 +28,4 @@ module FileSystemHelpers
         .select { |name| name[/\/$/].nil? }
     end
   end
-
-  def get_md5_of_file(path)
-    Digest::MD5.file(path).hexdigest
-  end
 end

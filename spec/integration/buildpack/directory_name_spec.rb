@@ -9,7 +9,7 @@ module Buildpack
       "file://#{location}"
     end
 
-    let(:md5) { Digest::MD5.file(fake_file_uri.gsub(/file:\/\//, '')).hexdigest }
+    let(:sha256) { Digest::SHA256.file(fake_file_uri.gsub(/file:\/\//, '')).hexdigest }
 
     let(:manifest) do
       {
@@ -19,7 +19,7 @@ module Buildpack
           {
             'name' => 'fake',
             'uri' => fake_file_uri,
-            'md5' => md5
+            'sha256' => sha256
           }
         ]
       }

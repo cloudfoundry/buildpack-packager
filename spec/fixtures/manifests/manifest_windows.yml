@@ -4,7 +4,7 @@ dependencies:
 - name: hwc
   version: 3.0.0
   uri: https://buildpacks.cloudfoundry.org/dependencies/hwc/hwc-3.0.0-windows-amd64-acb65777.zip
-  md5: acb65777be759df87d7d288146d592f7
+  sha256: c0ffee
   cf_stacks:
   - windows2012R2
   - windows2016

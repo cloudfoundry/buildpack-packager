@@ -105,14 +105,14 @@ dependencies:
   - name: bundler
     version: 1.7.12
     uri: https://pivotal-buildpacks.s3.amazonaws.com/ruby/binaries/lucid64/bundler-1.7.12.tgz
-    md5: ab7ebd9c9e945e3ea91c8dd0c6aa3562
+    sha256: 09b15ac14f7b46ac6d0a85102cef4671d95f6d6581e01dbcdbab0e64df83c4d5
     cf_stacks:
       - lucid64
       - cflinuxfs2
   - name: ruby
     version: 2.1.4
     uri: https://pivotal-buildpacks.s3.amazonaws.com/ruby/binaries/lucid64/ruby-2.1.4.tgz
-    md5: 72b4d193a11766e2a4c45c1fed65754c
+    sha256: e3e6023764357324260e9efab1f1690b7bcc0c69f82e8589797b262eb5df2831
     cf_stacks:
       - lucid64
 
@@ -140,7 +140,7 @@ A list of regular expressions that extract and map the values of `name` and `ver
 ## dependencies (required)
 
 
-The dependencies key specifies the name, version, uri, md5, and the
+The dependencies key specifies the name, version, uri, sha256, and the
 cf_stacks (the root file system(s) for which it is compiled for) of a
 resource which the buildpack attempts to download during staging. By
 specifying them here, the packager can download them and install them
@@ -151,7 +151,7 @@ All keys are required:
 - `name`, `version`, and `uri`:
 Required for `url_to_dependency_map` to work. Make sure to create a new entry in the `url_to_dependency_map` if a matching regex does not exist for the dependency to be curled.
 
-- `md5`:
+- `sha256`:
 Required to ensure that dependencies being packaged for 'cached' mode have not been compromised
 
 - `cf_stacks`:

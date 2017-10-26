@@ -24,7 +24,7 @@ dependencies:
   - name: fake_name
     version: 1.2
     uri: file://#{file_location}
-    md5: #{md5}
+    sha256: #{sha256}
     modules: ["one", "two", "three"]
     cf_stacks:
       - lucid64
@@ -58,14 +58,14 @@ dependencies:
   - name: fake_name
     version: 1.2
     uri: file://#{file_location}
-    md5: #{md5}
+    sha256: #{sha256}
     cf_stacks:
       - lucid64
       - cflinuxfs2
   - name: fake_name
     version: 1.1
     uri: file://#{deprecated_file_location}
-    md5: #{deprecated_md5}
+    sha256: #{deprecated_sha256}
     cf_stacks:
       - lucid64
       - cflinuxfs2
@@ -88,7 +88,7 @@ dependencies:
   - name: fake_name
     version: 1.2
     uri: file://#{file_location}
-    md5: md5
+    sha256: sha256
     cf_stacks: [cflinuxfs2]
 MANIFEST
     end
@@ -100,9 +100,9 @@ MANIFEST
   let(:buildpack_dir) { File.join(tmp_dir, 'sample-buildpack-root-dir') }
   let(:remote_dependencies_dir) { File.join(tmp_dir, 'remote_dependencies') }
   let(:file_location) { "#{remote_dependencies_dir}/dep1.txt" }
-  let(:md5) { Digest::MD5.file(file_location).hexdigest }
+  let(:sha256) { Digest::SHA256.file(file_location).hexdigest }
   let(:deprecated_file_location) { "#{remote_dependencies_dir}/dep2.txt" }
-  let(:deprecated_md5) { Digest::MD5.file(deprecated_file_location).hexdigest }
+  let(:deprecated_sha256) { Digest::SHA256.file(deprecated_file_location).hexdigest }
 
   let(:files_to_include) do
     [
@@ -365,7 +365,7 @@ MANIFEST
         end
 
         context 'vendored dependencies with invalid checksums' do
-          let(:md5) { 'InvalidMD5_123' }
+          let(:sha256) { 'InvalidSHA256_123' }
 
           specify do
             stdout, status = run_packager_binary(buildpack_dir, flags)
