@@ -1,3 +1,7 @@
+# Deprecated
+
+This repo has been deprecated in favor of https://github.com/cloudfoundry/libbuildpack/tree/master/packager/buildpack-packager
+
 # Buildpack Packager
 
 A [RubyGem](https://rubygems.org/) that provides tooling to package a buildpack for upload to Cloud Foundry.
