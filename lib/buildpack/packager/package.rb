@@ -5,6 +5,7 @@ require 'tmpdir'
 require 'yaml'
 require 'shellwords'
 require 'buildpack/packager/zip_file_excluder'
+require 'digest'
 
 module Buildpack
   module Packager
