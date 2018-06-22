@@ -80,12 +80,16 @@ module Buildpack
       private
 
       def uri_without_credentials(uri_string)
-        uri = URI(uri_string)
-        if uri.userinfo
-          uri.user = "-redacted-" if uri.user
-          uri.password = "-redacted-" if uri.password
+        if uri_string.start_with?("file:")
+          uri_string
+        else
+          uri = URI(uri_string)
+          if uri.userinfo
+            uri.user = "-redacted-" if uri.user
+            uri.password = "-redacted-" if uri.password
+          end
+          uri.to_s
         end
-        uri.to_s.sub("file:", "file://")
       end
 
       def uri_cache_path uri
