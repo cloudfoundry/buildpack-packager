@@ -168,6 +168,15 @@ module Buildpack
             expect(package.send(:uri_without_credentials, url_with_credentials)).to eq("http://-redacted-@some.cdn/with")
           end
         end
+
+        context 'local url without credentials does not have to much slashs' do
+          let(:url_with_credentials) { 'file:///my/local/path' }
+
+          it 'redacts the credential in the resulting file path' do
+            package = Package.new
+            expect(package.send(:uri_without_credentials, url_with_credentials)).to eq("file:///my/local/path")
+          end
+        end
       end
 
       describe '#build_zip_file' do
