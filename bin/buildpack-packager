@@ -23,6 +23,14 @@ optparser = OptionParser.new do |opts|
     options[:mode] = :uncached
   end
 
+  opts.on('--any-stack', '') do
+    options[:stack] = :any_stack
+  end
+
+  opts.on('--stack=STACK', '') do |stack|
+    options[:stack] = stack
+  end
+
   opts.on('--list', 'List dependencies supported by the buildpack.') do
     options[:mode] = :list
   end
@@ -50,6 +58,13 @@ optparser.parse!
 unless options[:mode]
   puts optparser
   exit 1
+end
+
+if options[:mode] == :cached || options[:mode] == :uncached
+  unless options[:stack]
+    puts optparser
+    exit 1
+  end
 end
 
 manifest_path = options[:manifest_path]

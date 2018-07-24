@@ -31,9 +31,10 @@ module Buildpack
         package.build_zip_file(temp_dir)
       end
 
+      buildpack_stack = options[:stack] == :any_stack ? "any stack" : options[:stack]
       buildpack_type = options[:mode] == :cached ? "Cached" : "Uncached"
       human_readable_size = `du -h #{package.zip_file_path} | cut -f1`
-      puts "#{buildpack_type} buildpack created and saved as #{package.zip_file_path} with a size of #{human_readable_size.strip}"
+      puts "#{buildpack_type} buildpack for #{buildpack_stack} created and saved as #{package.zip_file_path} with a size of #{human_readable_size.strip}"
 
       package
     end

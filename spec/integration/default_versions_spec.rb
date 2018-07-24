@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'fileutils'
 
 describe 'Buildpack packager default_versions validation' do
-  let(:flags)          { '--uncached' }
+  let(:flags)          { '--uncached --any-stack' }
   let(:buildpack_dir)  { Dir.mktmpdir }
   let(:cache_dir)      { Dir.mktmpdir }
   let(:base_manifest_contents) { <<-BASE

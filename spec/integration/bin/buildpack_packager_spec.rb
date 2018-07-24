@@ -228,14 +228,14 @@ MANIFEST
     end
 
     describe '--use-custom-manifest' do
-      let(:flags) { '--uncached' }
+      let(:flags) { '--uncached --any-stack' }
 
       before do
         create_manifests
       end
 
       context 'with the flag' do
-        let(:flags) { '--uncached --use-custom-manifest=manifest-including-default-versions.yml' }
+        let(:flags) { '--uncached --any-stack --use-custom-manifest=manifest-including-default-versions.yml' }
 
         it 'uses the specified manifest' do
           run_packager_binary(buildpack_dir, flags)
@@ -275,7 +275,7 @@ MANIFEST
   end
 
   context 'without a manifest' do
-    let(:flags) { '--uncached' }
+    let(:flags) { '--uncached --any-stack' }
 
     specify do
       output, status = run_packager_binary(buildpack_dir, flags)
@@ -286,7 +286,7 @@ MANIFEST
   end
 
   context 'with an invalid manifest' do
-    let(:flags) { '--uncached' }
+    let(:flags) { '--uncached --any-stack' }
 
     before do
       create_invalid_manifest
@@ -330,7 +330,7 @@ MANIFEST
 
     describe 'the zip file contents' do
       context 'an uncached buildpack' do
-        let(:flags) { '--uncached' }
+        let(:flags) { '--uncached --any-stack' }
 
         specify do
           output, status = run_packager_binary(buildpack_dir, flags)
@@ -343,8 +343,8 @@ MANIFEST
         end
       end
 
-      context 'an cached buildpack' do
-        let(:flags) { '--cached' }
+      context 'a cached buildpack' do
+        let(:flags) { '--cached --any-stack' }
 
         specify do
           _, status = run_packager_binary(buildpack_dir, flags)

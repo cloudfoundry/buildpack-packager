@@ -9,9 +9,10 @@ module Buildpack
       dir
     end
     let(:buildpack_dir) { File.join(tmp_dir, 'sample-buildpack-root-dir') }
+    let(:stack) { :any_stack }
     let(:cache_dir) { File.join(tmp_dir, 'cache-dir') }
-    let(:file_location) do
-      location = File.join(tmp_dir, 'sample_host')
+    def file_location(id='')
+      location = File.join(tmp_dir, "sample_host#{id}")
       File.write(location, 'contents!')
       location
     end
@@ -23,11 +24,20 @@ module Buildpack
       {
         root_dir: buildpack_dir,
         mode: buildpack_mode,
+        stack: stack,
         cache_dir: cache_dir,
         manifest_path: manifest_path
       }
     end
 
+    let(:dependencies) {[{
+          'version' => '1.0',
+          'name' => 'etc_host',
+          'sha256' => sha256,
+          'uri' => "file://#{file_location}",
+          'cf_stacks' => ['cflinuxfs2']
+        }]
+    }
     let(:manifest_path) { 'manifest.yml' }
     let(:manifest) do
       {
@@ -38,13 +48,7 @@ module Buildpack
           name: 'ruby',
           version: '$1'
         }],
-        dependencies: [{
-          'version' => '1.0',
-          'name' => 'etc_host',
-          'sha256' => sha256,
-          'uri' => "file://#{file_location}",
-          'cf_stacks' => ['cflinuxfs2']
-        }]
+        dependencies: dependencies
       }
     end
 
@@ -225,6 +229,34 @@ module Buildpack
           dependencies = ["dependencies/#{translated_file_location}"]
 
           expect(zip_contents).to match_array(buildpack_files + dependencies - git_files)
+        end
+
+        context 'set the stack' do
+          let(:stack) { 'cflinuxfs3' }
+          let(:dependencies) {
+            [{
+              'version' => '1.0',
+              'name' => 'etc_host',
+              'sha256' => sha256,
+              'uri' => "file://#{file_location('_cflinuxfs2')}",
+              'cf_stacks' => ['cflinuxfs2']
+            }, {
+              'version' => '1.0',
+              'name' => 'etc_host',
+              'sha256' => sha256,
+              'uri' => "file://#{file_location('_cflinuxfs3')}",
+              'cf_stacks' => ['cflinuxfs3']
+            }]
+          }
+          specify do
+            Packager.package(options)
+
+            zip_file_path = File.join(buildpack_dir, 'sample_buildpack-cached-v1.2.3.zip')
+            zip_contents = get_zip_contents(zip_file_path)
+            dependencies = ["dependencies/#{translated_file_location}_cflinuxfs3"]
+
+            expect(zip_contents).to match_array(buildpack_files + dependencies - git_files)
+          end
         end
       end
     end

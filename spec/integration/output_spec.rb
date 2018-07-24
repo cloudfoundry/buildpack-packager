@@ -3,6 +3,7 @@ require 'fileutils'
 
 describe 'Buildpack packager output' do
   let(:buildpack_type)    { '--uncached' }
+  let(:stack)             { '--any-stack' }
   let(:fixture_name)      { 'buildpack-without-uri-credentials' }
   let(:buildpack_fixture) { File.join(File.dirname(__FILE__), '..', 'fixtures', fixture_name) }
   let(:tmpdir)            { Dir.mktmpdir }
@@ -13,7 +14,7 @@ describe 'Buildpack packager output' do
 
   def buildpack_packager_execute(buildpack_dir, home_dir)
     Dir.chdir(buildpack_dir) do
-      `HOME=#{home_dir} buildpack-packager #{buildpack_type}`
+      `HOME=#{home_dir} buildpack-packager #{buildpack_type} #{stack}`
     end
   end
 
@@ -21,7 +22,7 @@ describe 'Buildpack packager output' do
 
   context 'building the uncached buildpack' do
     it 'outputs the type of buildpack created, where and its human readable size' do
-      expect(subject).to include("Uncached buildpack created and saved as")
+      expect(subject).to include("Uncached buildpack for any stack created and saved as")
       expect(subject).to include("spec/fixtures/#{fixture_name}/go_buildpack-v1.7.8.zip")
       expect(subject).to match(/with a size of 4\.0K$/)
     end
@@ -41,7 +42,7 @@ describe 'Buildpack packager output' do
     end
 
     it 'outputs the type of buildpack created, where and its human readable size' do
-      expect(subject).to include("Cached buildpack created and saved as")
+      expect(subject).to include("Cached buildpack for any stack created and saved as")
       expect(subject).to include("spec/fixtures/#{fixture_name}/go_buildpack-cached-v1.7.8.zip")
       expect(subject).to match(/with a size of [\d]+M$/)
     end

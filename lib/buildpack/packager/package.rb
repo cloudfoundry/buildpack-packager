@@ -27,30 +27,32 @@ module Buildpack
 
       def download_dependencies(dependencies, local_cache_directory, dependency_dir)
         dependencies.each do |dependency|
-          safe_uri = uri_without_credentials(dependency['uri'])
-          translated_filename = uri_cache_path(safe_uri)
-          local_cached_file = File.expand_path(File.join(local_cache_directory, translated_filename))
+          if options[:stack] == :any_stack || dependency.fetch(:cf_stacks, []).include?(options[:stack])
+            safe_uri = uri_without_credentials(dependency['uri'])
+            translated_filename = uri_cache_path(safe_uri)
+            local_cached_file = File.expand_path(File.join(local_cache_directory, translated_filename))
 
-          if options[:force_download] || !File.exist?(local_cached_file)
-	    puts "Downloading #{dependency['name']} version #{dependency['version']} from: #{safe_uri}"
-            download_file(dependency['uri'], local_cached_file)
-            human_readable_size = `du -h #{local_cached_file} | cut -f1`.strip
-            puts "  Using #{dependency['name']} version #{dependency['version']} with size #{human_readable_size}"
+            if options[:force_download] || !File.exist?(local_cached_file)
+              puts "Downloading #{dependency['name']} version #{dependency['version']} from: #{safe_uri}"
+              download_file(dependency['uri'], local_cached_file)
+              human_readable_size = `du -h #{local_cached_file} | cut -f1`.strip
+              puts "  Using #{dependency['name']} version #{dependency['version']} with size #{human_readable_size}"
 
-            from_local_cache = false
-          else
-            human_readable_size = `du -h #{local_cached_file} | cut -f1`.strip
-            puts "Using #{dependency['name']} version #{dependency['version']} from local cache at: #{local_cached_file} with size #{human_readable_size}"
-            from_local_cache = true
-	  end
+              from_local_cache = false
+            else
+              human_readable_size = `du -h #{local_cached_file} | cut -f1`.strip
+              puts "Using #{dependency['name']} version #{dependency['version']} from local cache at: #{local_cached_file} with size #{human_readable_size}"
+              from_local_cache = true
+            end
 
-          ensure_correct_dependency_checksum({
-            local_cached_file: local_cached_file,
-            dependency: dependency,
-            from_local_cache: from_local_cache
-          })
+            ensure_correct_dependency_checksum({
+              local_cached_file: local_cached_file,
+              dependency: dependency,
+              from_local_cache: from_local_cache
+            })
 
-          FileUtils.cp(local_cached_file, dependency_dir)
+            FileUtils.cp(local_cached_file, dependency_dir)
+          end
         end
       end
 
