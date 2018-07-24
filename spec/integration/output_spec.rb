@@ -43,7 +43,7 @@ describe 'Buildpack packager output' do
     it 'outputs the type of buildpack created, where and its human readable size' do
       expect(subject).to include("Cached buildpack created and saved as")
       expect(subject).to include("spec/fixtures/#{fixture_name}/go_buildpack-cached-v1.7.8.zip")
-      expect(subject).to match(/with a size of 68M$/)
+      expect(subject).to match(/with a size of [\d]+M$/)
     end
 
     context 'with a buildpack packager dependency cache intact' do
