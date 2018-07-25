@@ -24,13 +24,7 @@ module Buildpack
         a_manifest[:stack] = options[:stack]
 
         a_manifest[:dependencies] = a_manifest[:dependencies]
-                                      .select { |dep| if dep
-                                                         puts "dep: #{dep}"
-                                                         dep.fetch('cf_stacks', []).include? options[:stack]
-                                                      else
-                                                         puts "dep was nil"
-                                                         false
-                                                      end }
+                                      .select { |dep| dep.fetch('cf_stacks', []).include? options[:stack] }
                                       .each { |dep| dep.delete('cf_stacks') }
 
         a_manifest
