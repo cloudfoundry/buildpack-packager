@@ -12,7 +12,22 @@ module Buildpack
     class Package < Struct.new(:options)
       def copy_buildpack_to_temp_dir(temp_dir)
         FileUtils.cp_r(File.join(options[:root_dir], '.'), temp_dir)
-        FileUtils.cp(options[:manifest_path], File.join(temp_dir, 'manifest.yml'))
+
+        a_manifest = YAML.load_file(options[:manifest_path])
+        unless options[:stack] == :any_stack
+          a_manifest = edit_manifest_for_stack(a_manifest)
+        end
+        File.open(File.join(temp_dir, 'manifest.yml'), 'w') { |f| f.write(a_manifest.to_yaml) }
+      end
+
+      def edit_manifest_for_stack(a_manifest)
+        a_manifest[:stack] = options[:stack]
+
+        a_manifest[:dependencies] = a_manifest[:dependencies]
+                                      .select { |dep| dep.fetch('cf_stacks', []).include? options[:stack] }
+                                      .each { |dep| dep.delete('cf_stacks') }
+
+        a_manifest
       end
 
       def build_dependencies(temp_dir)
@@ -99,7 +114,8 @@ module Buildpack
       end
 
       def zip_file_name
-        "#{manifest[:language]}_buildpack#{cached_identifier}-v#{buildpack_version}.zip"
+        stack = options[:stack] == :any_stack ? '' : "-#{options[:stack]}"
+        "#{manifest[:language]}_buildpack#{cached_identifier}#{stack}-v#{buildpack_version}.zip"
       end
 
       def buildpack_version

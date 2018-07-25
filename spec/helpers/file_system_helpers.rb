@@ -28,4 +28,11 @@ module FileSystemHelpers
         .select { |name| name[/\/$/].nil? }
     end
   end
+
+  def get_manifest_from_zip(zip_path)
+    Zip::File.open(zip_path) do |zip_file|
+      entry = zip_file.glob('manifest.yml').first
+      return YAML.load(entry.get_input_stream.read)
+    end
+  end
 end

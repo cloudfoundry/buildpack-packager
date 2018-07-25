@@ -216,6 +216,55 @@ module Buildpack
 
           expect(zip_contents).to match_array(buildpack_files - git_files)
         end
+
+        context 'with stack set' do
+          let(:stack) { 'cflinuxfs2' }
+          let(:cflinuxfs2_dependency) {{
+              'version' => '1.0',
+              'name' => 'fs2_dep',
+              'sha256' => sha256 + '2',
+              'uri' => "file://#{file_location('_cflinuxfs2')}",
+              'cf_stacks' => ['cflinuxfs2']
+            }}
+          let(:dependencies) {
+            [cflinuxfs2_dependency, {
+              'version' => '1.0',
+              'name' => 'fs3_dep',
+              'sha256' => sha256 + '3',
+              'uri' => "file://#{file_location('_cflinuxfs3')}",
+              'cf_stacks' => ['cflinuxfs3']
+            }]
+          }
+
+          it "sets stack on manifest" do
+            Packager.package(options)
+
+            zip_file_path = File.join(buildpack_dir, 'sample_buildpack-cflinuxfs2-v1.2.3.zip')
+            new_manifest = get_manifest_from_zip(zip_file_path)
+
+            expect(new_manifest[:stack]).to eq("cflinuxfs2")
+          end
+
+          it "doesn't set cf_stacks on deps" do
+            Packager.package(options)
+
+            zip_file_path = File.join(buildpack_dir, 'sample_buildpack-cflinuxfs2-v1.2.3.zip')
+            new_manifest = get_manifest_from_zip(zip_file_path)
+
+            new_manifest[:dependencies].each do |dep|
+              expect(dep['cf_stacks']).to be_nil
+            end
+          end
+
+          it "excludes deps that don't match stack from manifest" do
+            Packager.package(options)
+
+            zip_file_path = File.join(buildpack_dir, 'sample_buildpack-cflinuxfs2-v1.2.3.zip')
+            new_manifest = get_manifest_from_zip(zip_file_path)
+
+            expect(new_manifest[:dependencies].map { |dep| dep['name'] }).to match_array([cflinuxfs2_dependency['name']])
+          end
+        end
       end
 
       context 'a cached buildpack' do
@@ -251,7 +300,7 @@ module Buildpack
           specify do
             Packager.package(options)
 
-            zip_file_path = File.join(buildpack_dir, 'sample_buildpack-cached-v1.2.3.zip')
+            zip_file_path = File.join(buildpack_dir, 'sample_buildpack-cached-cflinuxfs3-v1.2.3.zip')
             zip_contents = get_zip_contents(zip_file_path)
             dependencies = ["dependencies/#{translated_file_location}_cflinuxfs3"]
 

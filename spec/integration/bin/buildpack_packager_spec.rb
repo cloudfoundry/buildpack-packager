@@ -248,9 +248,9 @@ MANIFEST
             generated_manifest.extract(manifest_location)
           end
 
-          manifest_contents = File.read(manifest_location)
-
-          expect(manifest_contents).to eq(File.read(File.join(buildpack_dir, 'manifest-including-default-versions.yml')))
+          manifest_contents = YAML.load_file(manifest_location)
+          file_manifest_contents = YAML.load_file(File.join(buildpack_dir, 'manifest-including-default-versions.yml'))
+          expect(manifest_contents).to eq(file_manifest_contents)
         end
       end
 
@@ -266,9 +266,9 @@ MANIFEST
             generated_manifest.extract(manifest_location)
           end
 
-          manifest_contents = File.read(manifest_location)
-
-          expect(manifest_contents).to eq(File.read(File.join(buildpack_dir, 'manifest.yml')))
+          manifest_contents = YAML.load_file(manifest_location)
+          file_manifest_contents = YAML.load_file(File.join(buildpack_dir, 'manifest.yml'))
+          expect(manifest_contents).to eq(file_manifest_contents)
         end
       end
     end

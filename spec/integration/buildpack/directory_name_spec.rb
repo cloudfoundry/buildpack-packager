@@ -9,6 +9,13 @@ module Buildpack
       "file://#{location}"
     end
 
+    let(:manifest_path) do
+      location = File.join(Dir.mktmpdir, 'fake.manifest')
+      File.write(location, {language: 'text',
+                            dependencies: []}.to_yaml)
+      location
+    end
+
     let(:sha256) { Digest::SHA256.file(fake_file_uri.gsub(/file:\/\//, '')).hexdigest }
 
     let(:manifest) do
@@ -37,8 +44,9 @@ module Buildpack
     let(:options) do
       {
         root_dir: root_dir,
-        manifest_path: 'manifest.yml',
+        manifest_path: manifest_path,
         mode: mode,
+        stack: :any_stack,
         force_download: false,
         cache_dir: cache_dir
       }
