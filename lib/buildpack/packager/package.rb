@@ -13,7 +13,7 @@ module Buildpack
       def copy_buildpack_to_temp_dir(temp_dir)
         FileUtils.cp_r(File.join(options[:root_dir], '.'), temp_dir)
 
-        a_manifest = YAML.load_file(options[:manifest_path])
+        a_manifest = YAML.load_file(options[:manifest_path]).with_indifferent_access
         unless options[:stack] == :any_stack
           a_manifest = edit_manifest_for_stack(a_manifest)
         end
