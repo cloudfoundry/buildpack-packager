@@ -17,7 +17,7 @@ module Buildpack
         unless options[:stack] == :any_stack
           a_manifest = edit_manifest_for_stack(a_manifest)
         end
-        File.open(File.join(temp_dir, 'manifest.yml'), 'w') { |f| f.write(a_manifest.to_yaml) }
+        File.open(File.join(temp_dir, 'manifest.yml'), 'w') { |f| f.write(a_manifest.to_hash.to_yaml) }
       end
 
       def edit_manifest_for_stack(a_manifest)
