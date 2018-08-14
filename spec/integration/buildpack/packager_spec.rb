@@ -11,11 +11,13 @@ module Buildpack
     let(:buildpack_dir) { File.join(tmp_dir, 'sample-buildpack-root-dir') }
     let(:stack) { :any_stack }
     let(:cache_dir) { File.join(tmp_dir, 'cache-dir') }
-    def file_location(id='')
+
+    def file_location(id = '')
       location = File.join(tmp_dir, "sample_host#{id}")
       File.write(location, 'contents!')
       location
     end
+
     let(:translated_file_location) { 'file___' + file_location.gsub(/[:\/]/, '_') }
 
     let(:sha256) { Digest::SHA256.file(file_location).hexdigest }
@@ -30,24 +32,27 @@ module Buildpack
       }
     end
 
-    let(:dependencies) {[{
-          'version' => '1.0',
-          'name' => 'etc_host',
-          'sha256' => sha256,
-          'uri' => "file://#{file_location}",
-          'cf_stacks' => ['cflinuxfs2']
-        }]
+    let(:dependencies) {
+      [{
+         'version' => '1.0',
+         'name' => 'etc_host',
+         'sha256' => sha256,
+         'uri' => "file://#{file_location}",
+         'cf_stacks' => ['cflinuxfs2']
+       }]
     }
     let(:manifest_path) { 'manifest.yml' }
     let(:manifest) do
       {
         exclude_files: [],
         language: 'sample',
-        url_to_dependency_map: [{
-          match: 'ruby-(d+.d+.d+)',
-          name: 'ruby',
-          version: '$1'
-        }],
+        url_to_dependency_map: [
+          {
+            match: 'ruby-(d+.d+.d+)',
+            name: 'ruby',
+            version: '$1'
+          }
+        ],
         dependencies: dependencies
       }
     end
@@ -119,7 +124,7 @@ module Buildpack
           manifest['dependencies'] = []
           dependencies.each do |dependency|
             manifest['dependencies'].push('name' => dependency.first,
-                                          'version'   => dependency.last,
+                                          'version' => dependency.last,
                                           'cf_stacks' => ['cflinuxfs2'])
           end
           File.write(File.join(buildpack_dir, manifest_path), manifest.to_yaml)
@@ -219,21 +224,24 @@ module Buildpack
 
         context 'with stack set' do
           let(:stack) { 'cflinuxfs2' }
-          let(:cflinuxfs2_dependency) {{
-              'version' => '1.0',
-              'name' => 'fs2_dep',
-              'sha256' => sha256 + '2',
-              'uri' => "file://#{file_location('_cflinuxfs2')}",
-              'cf_stacks' => ['cflinuxfs2']
-            }}
+          let(:cflinuxfs2_dependency) { {
+            'version' => '1.0',
+            'name' => 'fs2_dep',
+            'sha256' => sha256 + '2',
+            'uri' => "file://#{file_location('_cflinuxfs2')}",
+            'cf_stacks' => ['cflinuxfs2']
+          } }
           let(:dependencies) {
-            [cflinuxfs2_dependency, {
-              'version' => '1.0',
-              'name' => 'fs3_dep',
-              'sha256' => sha256 + '3',
-              'uri' => "file://#{file_location('_cflinuxfs3')}",
-              'cf_stacks' => ['cflinuxfs3']
-            }]
+            [
+              cflinuxfs2_dependency,
+              {
+                'version' => '1.0',
+                'name' => 'fs3_dep',
+                'sha256' => sha256 + '3',
+                'uri' => "file://#{file_location('_cflinuxfs3')}",
+                'cf_stacks' => ['cflinuxfs3']
+              }
+            ]
           }
 
           it "sets stack on manifest" do
@@ -284,18 +292,18 @@ module Buildpack
           let(:stack) { 'cflinuxfs3' }
           let(:dependencies) {
             [{
-              'version' => '1.0',
-              'name' => 'etc_host',
-              'sha256' => sha256,
-              'uri' => "file://#{file_location('_cflinuxfs2')}",
-              'cf_stacks' => ['cflinuxfs2']
-            }, {
-              'version' => '1.0',
-              'name' => 'etc_host',
-              'sha256' => sha256,
-              'uri' => "file://#{file_location('_cflinuxfs3')}",
-              'cf_stacks' => ['cflinuxfs3']
-            }]
+               'version' => '1.0',
+               'name' => 'etc_host',
+               'sha256' => sha256,
+               'uri' => "file://#{file_location('_cflinuxfs2')}",
+               'cf_stacks' => ['cflinuxfs2']
+             }, {
+               'version' => '1.0',
+               'name' => 'etc_host',
+               'sha256' => sha256,
+               'uri' => "file://#{file_location('_cflinuxfs3')}",
+               'cf_stacks' => ['cflinuxfs3']
+             }]
           }
           specify do
             Packager.package(options)
@@ -510,8 +518,8 @@ module Buildpack
       context 'zip is not installed' do
         before do
           allow(Open3).to receive(:capture3)
-            .with('which zip')
-            .and_return(['', '', 'exit 1'])
+                            .with('which zip')
+                            .and_return(['', '', 'exit 1'])
         end
 
         specify do
