@@ -1,0 +1,13 @@
+---
+language: open_sus_language
+dependencies:
+- name: mr_open_sus_the_third
+  version: 3.0.0
+  uri: https://buildpacks.cloudfoundry.org/dependencies/garbage/not_real_url.zip
+  sha256: banana
+  cf_stacks:
+  - opensuse42
+  - sle12
+pre_package: scripts/build.sh
+
+exclude_files: []

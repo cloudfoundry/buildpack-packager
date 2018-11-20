@@ -39,6 +39,15 @@ describe Buildpack::ManifestValidator do
         expect(validator.errors).to be_empty
       end
     end
+
+    context 'with a manifest with opensus stacks', focus: true do
+      let (:manifest_file_name) { 'manifest_opensus.yml' }
+
+      it 'reports valid manifests correctly' do
+        expect(validator.valid?).to be(true)
+        expect(validator.errors).to be_empty
+      end
+    end
   end
 
   context 'with a manifest with an invalid sha256 key' do
