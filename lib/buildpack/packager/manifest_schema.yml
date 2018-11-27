@@ -51,6 +51,12 @@ mapping:
          "version":
            type: text
            required:  yes
+         "source":
+           type: str
+           required: no
+         "osl":
+           type: str
+           required: no
          "uri":
            type: str
            required:  yes
