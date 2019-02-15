@@ -1,5 +1,5 @@
 module Buildpack
   module Packager
-    VERSION = '2.3.18'.freeze
+    VERSION = '2.3.19'.freeze
   end
 end
