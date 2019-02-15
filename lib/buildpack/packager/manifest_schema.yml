@@ -68,7 +68,7 @@ mapping:
          "source_sha256":
            type: str
            required:  no
-          "sha256":
+         "sha256":
            type: str
            required:  yes
          "cf_stacks":
