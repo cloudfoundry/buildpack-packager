@@ -65,7 +65,10 @@ mapping:
            required:  no
            sequence:
              - type: str
-         "sha256":
+         "source_sha256":
+           type: str
+           required:  no
+          "sha256":
            type: str
            required:  yes
          "cf_stacks":

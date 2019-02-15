@@ -11,6 +11,7 @@ dependencies:
     version: 1.2
     uri: http://go.googlecode.com/files/go1.2.linux-amd64.tar.gz
     source: some-source
+    source_sha256: "asdASDadsadasdasdasdasdasdasdasdasdasdasdasdasdasdboo"
     osl: some-osl
     sha256: c0ffee
     cf_stacks:
