@@ -216,6 +216,15 @@ module Buildpack
               expect(package.send(:uri_without_credentials, url_with_credentials)).to eq("http://-redacted-@some.cdn/with")
             end
           end
+
+          context 'file url has authentication credential' do
+            let(:url_with_credentials) { 'file://log!i213:pas!9sword@/fake_uri.tgz' }
+
+            it 'ignores the credential in the resulting file path' do
+              package = Package.new
+              expect(package.send(:uri_without_credentials, url_with_credentials)).to eq('file:///fake_uri.tgz')
+            end
+          end
         end
       end
       describe '#copy_buildpack_to_temp_dir' do

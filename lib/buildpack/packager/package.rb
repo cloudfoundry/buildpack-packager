@@ -102,7 +102,7 @@ module Buildpack
           uri.user = "-redacted-" if uri.user
           uri.password = "-redacted-" if uri.password
         end
-        uri.to_s.sub("file:", "file://")
+        uri.to_s
       end
 
       def uri_cache_path uri
