@@ -40,7 +40,7 @@ describe Buildpack::ManifestValidator do
       end
     end
 
-    context 'with a manifest with opensus stacks', focus: true do
+    context 'with a manifest with opensus stacks' do
       let (:manifest_file_name) { 'manifest_opensus.yml' }
 
       it 'reports valid manifests correctly' do
