@@ -77,6 +77,18 @@ mapping:
            sequence:
              - type: str
                enum: [ lucid64, cflinuxfs2, cflinuxfs3, windows2012R2, windows2016, opensuse42, sle12, sle15 ]
+         "dependencies":
+           type:      seq
+           required:  no
+           sequence:
+             - type: map
+               mapping:
+                "name":
+                  type: str
+                  required:  yes
+                "version":
+                  type: text
+                  required:  no
   "exclude_files":
     type:      seq
     required:  yes
