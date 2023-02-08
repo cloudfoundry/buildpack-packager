@@ -60,7 +60,7 @@ module Buildpack
               from_local_cache = true
             end
 
-            ensure_correct_dependency_checksum({
+            ensure_correct_dependency_checksum(**{
               local_cached_file: local_cached_file,
               dependency: dependency,
               from_local_cache: from_local_cache
