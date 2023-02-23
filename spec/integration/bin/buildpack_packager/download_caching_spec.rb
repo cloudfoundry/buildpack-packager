@@ -27,12 +27,12 @@ describe 'reusing previously downloaded files' do
       'language' => 'sample',
       'url_to_dependency_map' => [],
       'dependencies' => [{
-        'version' => '1.0',
-        'name' => 'sample_download.ignore_me',
-        'cf_stacks' => [],
-        'sha256' => sha256,
-        'uri' => upstream_file_uri
-      }]
+                           'version' => '1.0',
+                           'name' => 'sample_download.ignore_me',
+                           'cf_stacks' => [],
+                           'sha256' => sha256,
+                           'uri' => upstream_file_uri
+                         }]
     }
   end
 

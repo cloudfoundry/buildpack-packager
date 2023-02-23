@@ -133,7 +133,7 @@ module Buildpack
             FileUtils.rm_rf(local_cached_file)
 
             download_file(dependency['uri'], local_cached_file)
-            ensure_correct_dependency_checksum({
+            ensure_correct_dependency_checksum(**{
               local_cached_file: local_cached_file,
               dependency: dependency,
               from_local_cache: false
